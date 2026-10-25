@@ -152,14 +152,13 @@ Halo para pejuang keringat! 🏋️‍♂️
 
 💾 *Yang tetap tersimpan:*
 • 🔥 Streak mingguan — lanjutkan!
-• ⭐ Total Points, EXP & Level — lifetime progress aman
 • 🏅 Achievement archive — yang sudah pernah unlock tetap tersimpan
 • 🛡️ Centurion Cycles — tetap berlaku
 
 ❄️ *Streak Freeze* — reset ke 1 tiap season. Dapat +1 lagi saat capai 4 minggu streak!
 
 🆕 *Season %d dimulai SEKARANG!*
-Semua peserta mulai dari titik yang sama untuk seasonal ranking. Tapi level dan EXP lifetime kamu tetap ada! 💪
+Semua peserta mulai dari titik yang sama untuk seasonal ranking. Ayo berburu rank dari awal! 💪
 
 📌 Langsung laporkan aktivitas pertamamu di Season %d dengan mengirim /lapor!
 

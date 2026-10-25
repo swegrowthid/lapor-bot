@@ -83,14 +83,10 @@ export const AttributeRow: React.FC<AttributeRowProps> = ({
         </>
       ) : (
         <td className="py-4 pl-4 text-center align-middle font-mono text-sm text-gray-300">
-          <span className="font-bold">{hunter.total_points}</span>
-          <span className="text-[10px] text-gray-500"> XP</span>
+          <span className="font-bold">{hunter.seasonal_points}</span>
+          <span className="text-[10px] text-gray-500"> pts</span>
         </td>
       )}
-
-      <td className="py-4 pl-4 pr-4 text-center align-middle font-mono text-sm text-gray-300">
-        <span className="font-bold">Lv.{hunter.level}</span>
-      </td>
     </tr>
   );
 };

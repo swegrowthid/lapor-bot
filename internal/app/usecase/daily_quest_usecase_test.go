@@ -98,8 +98,6 @@ func TestDailyQuestViewAndComplete(t *testing.T) {
 		UserID:         "user1",
 		Name:           "Alice",
 		JobClass:       "fighter",
-		Level:          5,
-		TotalPoints:    200,
 		LastReportDate: now.AddDate(0, 0, -2), // Has not reported today yet
 	}
 
@@ -154,11 +152,11 @@ func TestDailyQuestViewAndComplete(t *testing.T) {
 	if !strings.Contains(compMsg, "SIDE QUEST BERHASIL DISELESAIKAN") {
 		t.Errorf("expected success notification, got %q", compMsg)
 	}
-	if repo.upsertedReport.TotalSideQuests != 1 || repo.upsertedReport.SeasonalSideQuests != 1 {
-		t.Errorf("expected side quest counters to increase, got lifetime=%d season=%d", repo.upsertedReport.TotalSideQuests, repo.upsertedReport.SeasonalSideQuests)
+	if repo.upsertedReport.SeasonalSideQuests != 1 {
+		t.Errorf("expected side quest counter to increase, got season=%d", repo.upsertedReport.SeasonalSideQuests)
 	}
-	if repo.upsertedReport.TotalPoints != 202 {
-		t.Errorf("expected side quest (easy) to add 2 points, got total=%d (expected 202)", repo.upsertedReport.TotalPoints)
+	if repo.upsertedReport.SeasonalPoints != 2 {
+		t.Errorf("expected side quest (easy) to add 2 points, got season=%d (expected 2)", repo.upsertedReport.SeasonalPoints)
 	}
 }
 
@@ -179,7 +177,6 @@ func TestDailyQuestUpdateProgress_CompletesOnlySpecificQuest(t *testing.T) {
 			UserID:         "user1",
 			Name:           "Alice",
 			JobClass:       "necromancer",
-			TotalPoints:    100,
 			LastReportDate: now.AddDate(0, 0, -1),
 		},
 		quests: map[string]string{"user1:" + todayStr: string(tasksJSON)},
@@ -198,8 +195,8 @@ func TestDailyQuestUpdateProgress_CompletesOnlySpecificQuest(t *testing.T) {
 	if saved[0].Progress != 0 || saved[1].Progress != saved[1].Target {
 		t.Fatalf("quest progress = easy:%d specific:%d, want easy:0 specific:%d", saved[0].Progress, saved[1].Progress, saved[1].Target)
 	}
-	if repo.upsertedReport.TotalSideQuests != 1 {
-		t.Fatalf("completed sidequests = %d, want 1", repo.upsertedReport.TotalSideQuests)
+	if repo.upsertedReport.SeasonalSideQuests != 1 {
+		t.Fatalf("completed sidequests = %d, want 1", repo.upsertedReport.SeasonalSideQuests)
 	}
 }
 
@@ -223,24 +220,18 @@ func TestSendDailyQuests(t *testing.T) {
 			UserID:         "628123456789",
 			Name:           "Alice",
 			JobClass:       "fighter",
-			Level:          5,
-			TotalPoints:    200,
 			LastReportDate: now.AddDate(0, 0, -2),
 		},
 		{
 			UserID:         "628987654321",
 			Name:           "Bob",
 			JobClass:       "", // General
-			Level:          1,
-			TotalPoints:    10,
 			LastReportDate: now.AddDate(0, 0, -2),
 		},
 		{
 			UserID:         "628111222333",
 			Name:           "Charlie",
 			JobClass:       "fighter",
-			Level:          5,
-			TotalPoints:    200,
 			LastReportDate: now.AddDate(0, 0, -2),
 		},
 	}

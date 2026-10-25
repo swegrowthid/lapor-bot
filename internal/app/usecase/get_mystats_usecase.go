@@ -66,12 +66,6 @@ func (uc *GetMyStatsUsecase) Execute(ctx context.Context, userID, name string) (
 	sb := strings.Builder{}
 	sb.WriteString(fmt.Sprintf("📊 Statistik kamu, %s:\n\n", report.Name))
 
-	// Level display
-	actualLevel := domain.NumericLevelFromTotalPoints(report.TotalPoints)
-	if report.Level != actualLevel {
-		report.Level = actualLevel
-	}
-	sb.WriteString(fmt.Sprintf("🎖️ Level: Lv.%d • %s (lifetime)\n", report.Level, domain.FormatLevel(report.TotalPoints)))
 	sb.WriteString(fmt.Sprintf("🧭 Job: %s\n", domain.FormatJobClass(report.JobClass)))
 
 	sb.WriteString("\n💪 Attributes:\n")
@@ -82,16 +76,13 @@ func (uc *GetMyStatsUsecase) Execute(ctx context.Context, userID, name string) (
 	sb.WriteString(fmt.Sprintf("END (Endurance)  : %d pts\n", domain.ClampedAttribute(report.End)))
 	sb.WriteString(fmt.Sprintf("LUK (Luck)       : %d pts\n\n", domain.ClampedAttribute(report.Luk)))
 
-	sb.WriteString(fmt.Sprintf("📈 %s\n", domain.FormatNumericLevelProgressBar(report.TotalPoints)))
-	sb.WriteString(fmt.Sprintf("📊 %s\n\n", domain.FormatProgressBar(report.TotalPoints)))
-
 	sb.WriteString(fmt.Sprintf("🏹 Rank Season %d: %s\n", seasonNumber, domain.FormatSeasonRank(report.SeasonalPoints)))
 	sb.WriteString(fmt.Sprintf("🌟 Poin season: %d\n", report.SeasonalPoints))
 	sb.WriteString(fmt.Sprintf("🏅 Badge season: %d/%d\n", seasonBadgeCount, len(domain.AllSeasonAchievements)))
 	sb.WriteString(fmt.Sprintf("🗓️ Hari season: %d\n", seasonCount))
 	sb.WriteString(fmt.Sprintf("📆 Hari minggu ini: %d\n\n", weeklyCount))
 	sb.WriteString(fmt.Sprintf("🎯 Goals tercapai: %d\n\n", report.GoalsCompleted))
-	sb.WriteString(fmt.Sprintf("✨ Side quest selesai: %d lifetime • %d season\n\n", report.TotalSideQuests, report.SeasonalSideQuests))
+	sb.WriteString(fmt.Sprintf("✨ Side quest selesai: %d season\n\n", report.SeasonalSideQuests))
 
 	sb.WriteString(fmt.Sprintf("🔥 Streak saat ini: %d minggu\n", report.Streak))
 	sb.WriteString(fmt.Sprintf("🏆 Streak tertinggi: %d minggu\n", report.MaxStreak))
@@ -106,8 +97,7 @@ func (uc *GetMyStatsUsecase) Execute(ctx context.Context, userID, name string) (
 		streakFreezeInfo += " (max!)"
 	}
 	sb.WriteString(streakFreezeInfo + "\n")
-	sb.WriteString(fmt.Sprintf("📅 Total hari aktif (lifetime): %d\n", report.ActivityCount))
-	sb.WriteString(fmt.Sprintf("⭐ Total poin (lifetime): %d\n", report.TotalPoints))
+	sb.WriteString(fmt.Sprintf("📅 Total hari aktif: %d\n", report.ActivityCount))
 
 	if recentBadges := domain.RecentAchievementSummaries(report.Achievements, 3); len(recentBadges) > 0 {
 		sb.WriteString("\n🏅 Badge terbaru:\n")

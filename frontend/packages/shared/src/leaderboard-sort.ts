@@ -2,7 +2,6 @@ import type { EnrichedReport, LeaderboardSortKey, AttributeTab } from "./types";
 
 export const LEADERBOARD_SORT_KEYS: LeaderboardSortKey[] = [
   "season_rank",
-  "lifetime_xp",
   "weekly_streak",
   "daily_streak",
   "weekly_activity",
@@ -113,10 +112,6 @@ export function hasSeasonActivity(r: EnrichedReport): boolean {
   return r.seasonal_points > 0 || r.seasonal_activity_count > 0;
 }
 
-export function hasAnyActivity(r: EnrichedReport): boolean {
-  return r.total_points > 0 || r.activity_count > 0 || r.centurion_cycles > 0;
-}
-
 export function hasStreakActivity(r: EnrichedReport): boolean {
   return (
     r.streak > 0 ||
@@ -154,8 +149,6 @@ export function compareReports(
   switch (key) {
     case "season_rank":
       return compareSeasonRank(a, b);
-    case "lifetime_xp":
-      return compareLifetimeXP(a, b);
     case "weekly_streak":
       return compareWeeklyStreak(a, b);
     case "daily_streak":
@@ -193,14 +186,6 @@ function compareSeasonRank(a: EnrichedReport, b: EnrichedReport): boolean {
   return compareNameThenUserID(a, b);
 }
 
-function compareLifetimeXP(a: EnrichedReport, b: EnrichedReport): boolean {
-  if (a.total_points !== b.total_points) return a.total_points > b.total_points;
-  if (totalActiveDays(a) !== totalActiveDays(b))
-    return totalActiveDays(a) > totalActiveDays(b);
-  if (a.max_streak !== b.max_streak) return a.max_streak > b.max_streak;
-  return compareNameThenUserID(a, b);
-}
-
 function compareWeeklyStreak(a: EnrichedReport, b: EnrichedReport): boolean {
   if (a.streak !== b.streak) return a.streak > b.streak;
 
@@ -221,7 +206,8 @@ function compareDailyStreak(a: EnrichedReport, b: EnrichedReport): boolean {
   const aLongest = longestDailyStreak(a);
   const bLongest = longestDailyStreak(b);
   if (aLongest !== bLongest) return aLongest > bLongest;
-  if (a.total_points !== b.total_points) return a.total_points > b.total_points;
+  if (a.seasonal_points !== b.seasonal_points)
+    return a.seasonal_points > b.seasonal_points;
   return compareNameThenUserID(a, b);
 }
 
@@ -270,7 +256,8 @@ function compareAttributeOverall(
   const aAvg = attributeAverage(a);
   const bAvg = attributeAverage(b);
   if (aAvg !== bAvg) return aAvg > bAvg;
-  if (a.total_points !== b.total_points) return a.total_points > b.total_points;
+  if (a.seasonal_points !== b.seasonal_points)
+    return a.seasonal_points > b.seasonal_points;
   return compareNameThenUserID(a, b);
 }
 
@@ -282,7 +269,8 @@ function compareAttribute(
   const aVal = attributeValueByKey(a, key);
   const bVal = attributeValueByKey(b, key);
   if (aVal !== bVal) return aVal > bVal;
-  if (a.total_points !== b.total_points) return a.total_points > b.total_points;
+  if (a.seasonal_points !== b.seasonal_points)
+    return a.seasonal_points > b.seasonal_points;
   return compareNameThenUserID(a, b);
 }
 
@@ -344,8 +332,6 @@ function filterPredicateForSortKey(
       return hasSeasonActivity;
     case "weekly_activity":
       return (r) => r.week_active_days > 0;
-    case "lifetime_xp":
-      return hasAnyActivity;
     case "weekly_streak":
     case "daily_streak":
       return hasStreakActivity;

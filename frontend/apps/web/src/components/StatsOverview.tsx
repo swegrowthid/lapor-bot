@@ -77,7 +77,7 @@ export const StatsOverview: React.FC<StatsOverviewProps> = ({
       value: loading ? "..." : (summary?.total_workouts_logged ?? 0),
       icon: Activity,
       tone: "green",
-      description: "Total workouts in lifetime history",
+      description: "Total workouts logged so far",
     },
     {
       key: "season",

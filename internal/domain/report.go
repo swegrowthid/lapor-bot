@@ -19,8 +19,6 @@ type Report struct {
 	ActivityCount         int       `json:"activity_count" db:"activity_count"`
 	LastReportDate        time.Time `json:"last_report_date" db:"last_report_date"`
 	MaxStreak             int       `json:"max_streak" db:"max_streak"`
-	TotalPoints           int       `json:"total_points" db:"total_points"`
-	Level                 int       `json:"level" db:"level"`
 	Achievements          string    `json:"achievements" db:"achievements"`
 	ComebackStreak        int       `json:"comeback_streak" db:"comeback_streak"`
 	InactiveDays          int       `json:"inactive_days" db:"inactive_days"`
@@ -31,7 +29,6 @@ type Report struct {
 	SeasonalAchievements  string    `json:"seasonal_achievements" db:"seasonal_achievements"`
 	StreakFreezes         int       `json:"streak_freezes" db:"streak_freezes"`
 	GoalsCompleted        int       `json:"goals_completed" db:"goals_completed"`
-	TotalSideQuests       int       `json:"total_side_quests" db:"total_side_quests"`
 	SeasonalSideQuests    int       `json:"seasonal_side_quests" db:"seasonal_side_quests"`
 	WalkStepsTotal        int       `json:"walk_steps_total" db:"walk_steps_total"`
 	SeasonalWalkSteps     int       `json:"seasonal_walk_steps" db:"seasonal_walk_steps"`
@@ -431,7 +428,7 @@ type ReportRepository interface {
 	// date (cancel support): walk_steps -= walk_steps_last.
 	DeleteLatestWalkSteps(ctx context.Context, userID string, date time.Time) error
 	// GetWalkStepsTotals aggregates steps per user since the given date
-	// (zero time = lifetime). Rows are ordered by steps DESC.
+	// (zero time = all-time). Rows are ordered by steps DESC.
 	GetWalkStepsTotals(ctx context.Context, since time.Time) ([]WalkStepsEntry, error)
 
 	GetDailyActivityCount(ctx context.Context, userID string, date time.Time) (int, error)

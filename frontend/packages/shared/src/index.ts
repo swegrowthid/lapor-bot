@@ -17,7 +17,6 @@ export {
   getStreakStatus,
   getActiveAttributeTab,
   hasSeasonActivity,
-  hasAnyActivity,
   hasStreakActivity,
   hasAttributeActivity,
   hasWalkActivity,

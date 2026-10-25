@@ -9,7 +9,6 @@ import type {
 import {
   sortLeaderboard,
   hasSeasonActivity,
-  hasAnyActivity,
   hasStreakActivity,
   hasAttributeActivity,
   hasWalkActivity,
@@ -21,7 +20,6 @@ const PAGE_SIZE = 15;
 
 const TAB_SORT_KEY: Record<LeaderboardTab, LeaderboardSortKey> = {
   seasonal: "season_rank",
-  lifetime: "lifetime_xp",
   streak: "weekly_streak",
   week: "weekly_activity",
   walk: "walk_steps",
@@ -30,7 +28,6 @@ const TAB_SORT_KEY: Record<LeaderboardTab, LeaderboardSortKey> = {
 
 const TAB_FILTER: Record<LeaderboardTab, (r: EnrichedReport) => boolean> = {
   seasonal: hasSeasonActivity,
-  lifetime: hasAnyActivity,
   streak: hasStreakActivity,
   week: (r) => r.week_active_days > 0,
   walk: hasWalkActivity,

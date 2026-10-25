@@ -292,7 +292,6 @@ func TestCancelReport_SingleDay_CancelsWithoutDeletingAll(t *testing.T) {
 			LastReportDate: time.Now(),
 			ActivityCount:  1,
 			Streak:         1,
-			TotalPoints:    10,
 		},
 		dates:      []time.Time{today},
 		dailyCount: 1,
@@ -324,8 +323,8 @@ func TestCancelReport_SingleDay_CancelsWithoutDeletingAll(t *testing.T) {
 	if repo.upsertedReport.Streak != 0 {
 		t.Fatalf("expected Streak=0, got %d", repo.upsertedReport.Streak)
 	}
-	if repo.upsertedReport.TotalPoints != 0 {
-		t.Fatalf("expected TotalPoints=0, got %d", repo.upsertedReport.TotalPoints)
+	if repo.upsertedReport.SeasonalPoints != 0 {
+		t.Fatalf("expected SeasonalPoints=0, got %d", repo.upsertedReport.SeasonalPoints)
 	}
 	if repo.upsertedReport.UserID != "user1" {
 		t.Fatalf("expected UserID=user1, got %s", repo.upsertedReport.UserID)
@@ -350,7 +349,6 @@ func TestCancelReport_MultipleDays_Recalculates(t *testing.T) {
 			LastReportDate: time.Now(),
 			ActivityCount:  2,
 			Streak:         2,
-			TotalPoints:    20,
 		},
 		dates:      []time.Time{lastWeek, today},
 		dailyCount: 1,
@@ -394,8 +392,6 @@ func TestCancelReport_DeletesOnlyRegularReportKind(t *testing.T) {
 			JobClass:           "fighter",
 			LastReportDate:     time.Now(),
 			ActivityCount:      1,
-			TotalPoints:        10,
-			TotalSideQuests:    2,
 			SeasonalSideQuests: 2,
 			Str:                7,
 			End:                4,
@@ -422,8 +418,8 @@ func TestCancelReport_DeletesOnlyRegularReportKind(t *testing.T) {
 	if repo.dailyCountByKind[domain.ActivityKindSideQuest] != 2 {
 		t.Fatalf("sidequest count should not change, got %d", repo.dailyCountByKind[domain.ActivityKindSideQuest])
 	}
-	if repo.upsertedReport.TotalSideQuests != 2 {
-		t.Fatalf("sidequest total should be preserved, got %d", repo.upsertedReport.TotalSideQuests)
+	if repo.upsertedReport.SeasonalSideQuests != 2 {
+		t.Fatalf("sidequest total should be preserved, got %d", repo.upsertedReport.SeasonalSideQuests)
 	}
 	if repo.upsertedReport.JobClass != "fighter" || repo.upsertedReport.Str != 7 {
 		t.Fatalf("non-report fields should be preserved, got job=%q str=%d", repo.upsertedReport.JobClass, repo.upsertedReport.Str)
@@ -441,7 +437,6 @@ func TestCancelSideQuest_DeletesOnlyLatestSideQuestKind(t *testing.T) {
 			Name:               "Budi",
 			LastReportDate:     time.Now(),
 			ActivityCount:      3,
-			TotalSideQuests:    2,
 			SeasonalSideQuests: 2,
 		},
 		dailyCountByKind: map[string]int{
@@ -467,8 +462,8 @@ func TestCancelSideQuest_DeletesOnlyLatestSideQuestKind(t *testing.T) {
 	if repo.dailyCountByKind[domain.ActivityKindRegularReport] != 1 {
 		t.Fatalf("regular report count should not change, got %d", repo.dailyCountByKind[domain.ActivityKindRegularReport])
 	}
-	if repo.upsertedReport.TotalSideQuests != 1 {
-		t.Fatalf("expected TotalSideQuests=1, got %d", repo.upsertedReport.TotalSideQuests)
+	if repo.upsertedReport.SeasonalSideQuests != 1 {
+		t.Fatalf("expected SeasonalSideQuests=1, got %d", repo.upsertedReport.SeasonalSideQuests)
 	}
 	if repo.upsertedReport.ActivityCount != 3 {
 		t.Fatalf("regular ActivityCount should not change, got %d", repo.upsertedReport.ActivityCount)
@@ -536,7 +531,6 @@ func TestCancelReport_MultiDay_PreservesSeasonProgress(t *testing.T) {
 			Streak:                2,
 			MaxStreak:             2,
 			SeasonalMaxStreak:     2,
-			TotalPoints:           100,
 			SeasonalPoints:        80,
 			SeasonalActivityCount: 5,
 			Achievements:          "first_report,streak_1",
@@ -585,8 +579,8 @@ func TestCancelReport_MultiDay_PreservesSeasonProgress(t *testing.T) {
 	if r.ActivityCount != 1 || r.Streak != 1 {
 		t.Fatalf("counters should be recalculated to last week only, got count=%d streak=%d", r.ActivityCount, r.Streak)
 	}
-	if r.TotalPoints != 83 || r.SeasonalPoints != 63 {
-		t.Fatalf("points must be preserved minus today's 17, got total=%d season=%d", r.TotalPoints, r.SeasonalPoints)
+	if r.SeasonalPoints != 63 {
+		t.Fatalf("points must be preserved minus today's 17, got season=%d", r.SeasonalPoints)
 	}
 	if r.SeasonalActivityCount != 4 {
 		t.Fatalf("one season active day removed: got %d, want 4", r.SeasonalActivityCount)
@@ -613,9 +607,7 @@ func TestCancelSideQuest_ReversesPointsAndQuestState(t *testing.T) {
 			UserID: "user1", Name: "Budi",
 			LastReportDate:     time.Now(),
 			ActivityCount:      3,
-			TotalPoints:        50,
 			SeasonalPoints:     40,
-			TotalSideQuests:    2,
 			SeasonalSideQuests: 2,
 		},
 		dailyCountByKind: map[string]int{
@@ -648,11 +640,11 @@ func TestCancelSideQuest_ReversesPointsAndQuestState(t *testing.T) {
 		t.Fatalf("compensating event wrong: %+v", ce)
 	}
 	r := repo.cancelReport
-	if r.TotalPoints != 47 || r.SeasonalPoints != 37 {
-		t.Fatalf("sidequest points must be reversed: got total=%d season=%d", r.TotalPoints, r.SeasonalPoints)
+	if r.SeasonalPoints != 37 {
+		t.Fatalf("sidequest points must be reversed: got season=%d", r.SeasonalPoints)
 	}
-	if r.TotalSideQuests != 1 || r.SeasonalSideQuests != 1 {
-		t.Fatalf("sidequest counters must decrement: got %d/%d", r.TotalSideQuests, r.SeasonalSideQuests)
+	if r.SeasonalSideQuests != 1 {
+		t.Fatalf("sidequest counters must decrement: got %d", r.SeasonalSideQuests)
 	}
 	if r.ActivityCount != 3 {
 		t.Fatalf("regular ActivityCount must not change, got %d", r.ActivityCount)
@@ -676,9 +668,7 @@ func TestCancelSideQuest_PreLedger_UsesQuestDifficultyFallback(t *testing.T) {
 			UserID: "user1", Name: "Budi",
 			LastReportDate:     time.Now(),
 			ActivityCount:      3,
-			TotalPoints:        50,
 			SeasonalPoints:     40,
-			TotalSideQuests:    1,
 			SeasonalSideQuests: 1,
 		},
 		dailyCountByKind: map[string]int{
@@ -698,11 +688,11 @@ func TestCancelSideQuest_PreLedger_UsesQuestDifficultyFallback(t *testing.T) {
 	if r == nil {
 		t.Fatal("legacy path must upsert the report")
 	}
-	if r.TotalPoints != 45 || r.SeasonalPoints != 35 {
-		t.Fatalf("hard quest = 5 pts fallback reversal, got total=%d season=%d", r.TotalPoints, r.SeasonalPoints)
+	if r.SeasonalPoints != 35 {
+		t.Fatalf("hard quest = 5 pts fallback reversal, got season=%d", r.SeasonalPoints)
 	}
-	if r.TotalSideQuests != 0 {
-		t.Fatalf("expected TotalSideQuests=0, got %d", r.TotalSideQuests)
+	if r.SeasonalSideQuests != 0 {
+		t.Fatalf("expected SeasonalSideQuests=0, got %d", r.SeasonalSideQuests)
 	}
 	if !strings.Contains(repo.savedQuestJSON, `"progress":0`) {
 		t.Fatalf("quest completion should be reverted, saved: %s", repo.savedQuestJSON)
@@ -719,7 +709,6 @@ func TestCancelAllSideQuest_DeletesOnlySideQuestKind(t *testing.T) {
 			Name:               "Budi",
 			LastReportDate:     time.Now(),
 			ActivityCount:      3,
-			TotalSideQuests:    2,
 			SeasonalSideQuests: 2,
 		},
 		dailyCountByKind: map[string]int{
@@ -739,7 +728,7 @@ func TestCancelAllSideQuest_DeletesOnlySideQuestKind(t *testing.T) {
 	if repo.dailyCountByKind[domain.ActivityKindRegularReport] != 1 {
 		t.Fatalf("regular report count should not change, got %d", repo.dailyCountByKind[domain.ActivityKindRegularReport])
 	}
-	if repo.upsertedReport.TotalSideQuests != 0 {
-		t.Fatalf("expected TotalSideQuests=0, got %d", repo.upsertedReport.TotalSideQuests)
+	if repo.upsertedReport.SeasonalSideQuests != 0 {
+		t.Fatalf("expected SeasonalSideQuests=0, got %d", repo.upsertedReport.SeasonalSideQuests)
 	}
 }

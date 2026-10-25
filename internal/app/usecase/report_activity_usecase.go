@@ -300,7 +300,6 @@ func (uc *ReportActivityUsecase) execute(ctx context.Context, userID, name strin
 			SeasonalMaxStreak:     1,
 			LastReportDate:        now,
 			MaxStreak:             0,
-			TotalPoints:           0,
 			SeasonalPoints:        0,
 			Achievements:          "",
 			SeasonalAchievements:  "",
@@ -313,8 +312,6 @@ func (uc *ReportActivityUsecase) execute(ctx context.Context, userID, name strin
 	if report.MaxStreak == 0 {
 		report.MaxStreak = 1
 	}
-	oldNumericLevel := domain.NumericLevelFromTotalPoints(report.TotalPoints)
-	oldLifetimeTier := domain.GetLevel(report.TotalPoints)
 	oldSeasonRank := domain.GetSeasonRank(report.SeasonalPoints)
 
 	newRecord := false
@@ -346,7 +343,6 @@ func (uc *ReportActivityUsecase) execute(ctx context.Context, userID, name strin
 		weeklyStreakBonus = 0
 		dailyStreakBonus = 0
 		seasonalFirstBonus = 0
-		report.TotalSideQuests += opts.sideQuestCount
 		report.SeasonalSideQuests += opts.sideQuestCount
 	}
 	// streakBonus is the additive sum of weekly + daily components. Weekly
@@ -358,7 +354,6 @@ func (uc *ReportActivityUsecase) execute(ctx context.Context, userID, name strin
 	if isRepeatReport && !isSideQuest {
 		reportPoints = reportPoints / 2
 	}
-	report.TotalPoints += reportPoints
 	report.SeasonalPoints += reportPoints
 
 	activityForParse := opts.activityText
@@ -395,7 +390,6 @@ func (uc *ReportActivityUsecase) execute(ctx context.Context, userID, name strin
 			if !domain.HasAchievement(report.Achievements, ach.ID) {
 				report.Achievements = domain.AddAchievement(report.Achievements, ach.ID)
 			}
-			report.TotalPoints += ach.Points
 			report.SeasonalPoints += ach.Points
 			pointsGained += ach.Points
 		}
@@ -403,7 +397,7 @@ func (uc *ReportActivityUsecase) execute(ctx context.Context, userID, name strin
 		comebackAchievements = domain.CheckComebackAchievements(report)
 		for _, ach := range comebackAchievements {
 			report.Achievements = domain.AddAchievement(report.Achievements, ach.ID)
-			report.TotalPoints += ach.Points
+			report.SeasonalPoints += ach.Points
 			pointsGained += ach.Points
 		}
 	}
@@ -418,11 +412,7 @@ func (uc *ReportActivityUsecase) execute(ctx context.Context, userID, name strin
 		}
 	}
 
-	report.Level = domain.NumericLevelFromTotalPoints(report.TotalPoints)
-	leveledUp := report.Level > oldNumericLevel
-	newLifetimeTier := domain.GetLevel(report.TotalPoints)
 	newSeasonRank := domain.GetSeasonRank(report.SeasonalPoints)
-	lifetimeTierUp := newLifetimeTier.Tier > oldLifetimeTier.Tier
 	seasonRankUp := newSeasonRank.Tier > oldSeasonRank.Tier
 	totalPointsGained := reportPoints + pointsGained
 
@@ -470,7 +460,6 @@ func (uc *ReportActivityUsecase) execute(ctx context.Context, userID, name strin
 		if report.JobClass != "" {
 			response += fmt.Sprintf("🧭 Job: %s\n", domain.FormatJobClass(report.JobClass))
 		}
-		response += fmt.Sprintf("\n📊 Level: Lv.%d • %s (Total: %d pts)\n", report.Level, domain.FormatLevel(report.TotalPoints), report.TotalPoints)
 		response += fmt.Sprintf("📅 Total hari aktif: %d\n", report.ActivityCount)
 
 		nextComebackAch := uc.getNextComebackTarget(report)
@@ -549,12 +538,6 @@ func (uc *ReportActivityUsecase) execute(ctx context.Context, userID, name strin
 		}
 	}
 
-	if leveledUp {
-		response += fmt.Sprintf("\n\n⚔️ *LEVEL UP!* Lv.%d → Lv.%d", oldNumericLevel, report.Level)
-	}
-	if lifetimeTierUp {
-		response += fmt.Sprintf("\n🎖️ *TIER LIFETIME UP!* %s %s → %s %s", oldLifetimeTier.Name, oldLifetimeTier.Icon, newLifetimeTier.Name, newLifetimeTier.Icon)
-	}
 	if seasonRankUp {
 		response += fmt.Sprintf("\n🏹 *RANK SEASON UP!* %s %s → %s %s", oldSeasonRank.Name, oldSeasonRank.Icon, newSeasonRank.Name, newSeasonRank.Icon)
 	}
@@ -578,11 +561,9 @@ func (uc *ReportActivityUsecase) execute(ctx context.Context, userID, name strin
 	response += fmt.Sprintf("\n\n💬 _\"%s\"_", RandomQuote())
 
 	if totalPointsGained > 0 {
-		response += fmt.Sprintf("\n\n💰 Total: +%d points (Lifetime: %d | Season: %d)", totalPointsGained, report.TotalPoints, report.SeasonalPoints)
+		response += fmt.Sprintf("\n\n💰 Total: +%d points (Season: %d)", totalPointsGained, report.SeasonalPoints)
 	}
 
-	response += fmt.Sprintf("\n%s", domain.FormatNumericLevelProgressBar(report.TotalPoints))
-	response += fmt.Sprintf("\n%s", domain.FormatProgressBar(report.TotalPoints))
 	if attributesActive {
 		response += fmt.Sprintf("\n\n%s", formatCurrentAttributes(report))
 	}
@@ -705,7 +686,6 @@ func (uc *ReportActivityUsecase) executeYesterday(ctx context.Context, userID, n
 			SeasonalMaxStreak:     1,
 			LastReportDate:        now.AddDate(0, 0, -1),
 			MaxStreak:             0,
-			TotalPoints:           0,
 			SeasonalPoints:        0,
 			Achievements:          "",
 			SeasonalAchievements:  "",
@@ -718,7 +698,6 @@ func (uc *ReportActivityUsecase) executeYesterday(ctx context.Context, userID, n
 	if report.MaxStreak == 0 {
 		report.MaxStreak = 1
 	}
-	oldNumericLevel := domain.NumericLevelFromTotalPoints(report.TotalPoints)
 
 	newRecord := false
 	if report.Streak > report.MaxStreak {
@@ -744,7 +723,6 @@ func (uc *ReportActivityUsecase) executeYesterday(ctx context.Context, userID, n
 	}
 	streakBonus := weeklyStreakBonus
 	reportPoints := basePoints + streakBonus + seasonalFirstBonus
-	report.TotalPoints += reportPoints
 	report.SeasonalPoints += reportPoints
 
 	activityForParse := activityText
@@ -778,7 +756,6 @@ func (uc *ReportActivityUsecase) executeYesterday(ctx context.Context, userID, n
 		if !domain.HasAchievement(report.Achievements, ach.ID) {
 			report.Achievements = domain.AddAchievement(report.Achievements, ach.ID)
 		}
-		report.TotalPoints += ach.Points
 		report.SeasonalPoints += ach.Points
 		pointsGained += ach.Points
 	}
@@ -786,7 +763,7 @@ func (uc *ReportActivityUsecase) executeYesterday(ctx context.Context, userID, n
 	comebackAchievements := domain.CheckComebackAchievements(report)
 	for _, ach := range comebackAchievements {
 		report.Achievements = domain.AddAchievement(report.Achievements, ach.ID)
-		report.TotalPoints += ach.Points
+		report.SeasonalPoints += ach.Points
 		pointsGained += ach.Points
 	}
 
@@ -798,8 +775,6 @@ func (uc *ReportActivityUsecase) executeYesterday(ctx context.Context, userID, n
 		}
 	}
 
-	report.Level = domain.NumericLevelFromTotalPoints(report.TotalPoints)
-	leveledUp := report.Level > oldNumericLevel
 	totalPointsGained := reportPoints + pointsGained
 
 	if err := uc.upsertReportWithActivity(ctx, report, reportActivityEventInput{
@@ -843,7 +818,6 @@ func (uc *ReportActivityUsecase) executeYesterday(ctx context.Context, userID, n
 		if report.JobClass != "" {
 			response += fmt.Sprintf("🧭 Job: %s\n", domain.FormatJobClass(report.JobClass))
 		}
-		response += fmt.Sprintf("\n📊 Level: Lv.%d • %s (Total: %d pts)\n", report.Level, domain.FormatLevel(report.TotalPoints), report.TotalPoints)
 		response += fmt.Sprintf("📅 Total hari aktif: %d\n", report.ActivityCount)
 
 		nextComebackAch := uc.getNextComebackTarget(report)
@@ -915,10 +889,6 @@ func (uc *ReportActivityUsecase) executeYesterday(ctx context.Context, userID, n
 		}
 	}
 
-	if leveledUp {
-		response += fmt.Sprintf("\n\n⚔️ *LEVEL UP!* Lv.%d → Lv.%d", oldNumericLevel, report.Level)
-	}
-
 	if len(newAchievements)+len(comebackAchievements) > 0 {
 		response += "\n\n🏅 *Badge baru:*"
 		for _, ach := range newAchievements {
@@ -938,11 +908,9 @@ func (uc *ReportActivityUsecase) executeYesterday(ctx context.Context, userID, n
 	response += fmt.Sprintf("\n\n💬 _\"%s\"_", RandomQuote())
 
 	if totalPointsGained > 0 {
-		response += fmt.Sprintf("\n\n💰 Total: +%d points (Lifetime: %d | Season: %d)", totalPointsGained, report.TotalPoints, report.SeasonalPoints)
+		response += fmt.Sprintf("\n\n💰 Total: +%d points (Season: %d)", totalPointsGained, report.SeasonalPoints)
 	}
 
-	response += fmt.Sprintf("\n%s", domain.FormatNumericLevelProgressBar(report.TotalPoints))
-	response += fmt.Sprintf("\n%s", domain.FormatProgressBar(report.TotalPoints))
 	if attributesActive {
 		response += fmt.Sprintf("\n\n%s", formatCurrentAttributes(report))
 	}

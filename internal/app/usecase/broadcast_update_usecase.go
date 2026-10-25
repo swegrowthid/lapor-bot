@@ -33,13 +33,12 @@ Season %d sedang berjalan. Setelah season berjalan selesai, bot akan otomatis la
 • 🏆 Rank & Seasonal Leaderboard
 
 💾 *Yang Tetap Aman:*
-• ⭐ Total Points, EXP & Level lifetime
 • 🔥 Streak mingguan
 • 🏅 Achievement archive
 • 🛡️ Centurion Cycles
 
 💡 *Artinya:*
-Seasonal ranking mulai dari awal, tapi progres lifetime tetap lanjut. Ini kesempatan baru untuk berburu rank tanpa kehilangan level! 🎯
+Seasonal ranking mulai dari awal. Ini kesempatan baru untuk berburu rank! 🎯
 
 📌 Manfaatkan Season %d ini sebaik mungkin. Laporkan aktivitasmu dengan /lapor!
 

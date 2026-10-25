@@ -4,7 +4,6 @@ import {
   SlidersHorizontal,
   Flame,
   Trophy,
-  Award,
   CalendarDays,
   Swords,
   Footprints,
@@ -19,7 +18,6 @@ import type {
 } from "@lapor-bot/shared";
 
 import { SeasonalRow } from "./leaderboard/rows/SeasonalRow";
-import { LifetimeRow } from "./leaderboard/rows/LifetimeRow";
 import { StreakRow } from "./leaderboard/rows/StreakRow";
 import { WalkRow } from "./leaderboard/rows/WalkRow";
 import { WeekRow } from "./leaderboard/rows/WeekRow";
@@ -48,7 +46,6 @@ const LEADERBOARD_TABS: {
   icon: typeof Trophy;
 }[] = [
   { id: "seasonal", label: "Season Rank", icon: Trophy },
-  { id: "lifetime", label: "Lifetime XP", icon: Award },
   { id: "streak", label: "Streak Masters", icon: Flame },
   { id: "walk", label: "Jalan Kaki", icon: Footprints },
   { id: "week", label: "Minggu Ini", icon: CalendarDays },
@@ -71,7 +68,7 @@ const STREAK_SUB_TABS: { id: StreakTab; label: string }[] = [
 ];
 
 const TABLE_HEADERS: Record<LeaderboardTab, string[]> = {
-  walk: ["Rank", "Hunter", "Job", "Langkah Minggu Ini", "Langkah Season", "Lifetime Langkah"],
+  walk: ["Rank", "Hunter", "Job", "Langkah Minggu Ini", "Langkah Season", "Langkah Total"],
   seasonal: [
     "Rank",
     "Hunter",
@@ -83,24 +80,13 @@ const TABLE_HEADERS: Record<LeaderboardTab, string[]> = {
     "Freezes",
     "Season Points + Progress",
   ],
-  lifetime: [
-    "Rank",
-    "Hunter",
-    "Job",
-    "Level Tier",
-    "Level",
-    "XP Progress",
-    "Lifetime Days",
-    "Best Streak",
-    "Quests Done",
-  ],
   streak: [
     "Rank",
     "Hunter",
     "Job",
     "Current Streak",
     "Best Streak",
-    "Lifetime Days",
+    "Total Days",
     "Comeback",
     "Centurion",
     "Status",
@@ -125,7 +111,6 @@ const TABLE_HEADERS: Record<LeaderboardTab, string[]> = {
     "VIT",
     "END",
     "LUK",
-    "Level",
   ],
 };
 
@@ -198,16 +183,6 @@ export const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
         case "seasonal":
           return (
             <SeasonalRow
-              key={hunter.user_id}
-              hunter={hunter}
-              rank={rank}
-              rowClass={rc}
-              onSelectHunter={onSelectHunter}
-            />
-          );
-        case "lifetime":
-          return (
-            <LifetimeRow
               key={hunter.user_id}
               hunter={hunter}
               rank={rank}

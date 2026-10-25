@@ -171,9 +171,9 @@ func (uc *CancelReportUsecase) cancelRepeatReport(ctx context.Context, report *d
 	msg += fmt.Sprintf("📌 Sisa laporan hari ini: %d/%d\n", remaining, MaxDailyReports)
 	msg += fmt.Sprintf("📅 Total hari aktif tetap: %d\n", report.ActivityCount)
 	if pointsReversed > 0 {
-		msg += fmt.Sprintf("⭐ Poin dikurangi: -%d (Total poin sekarang: %d)\n", pointsReversed, report.TotalPoints)
+		msg += fmt.Sprintf("⭐ Poin dikurangi: -%d (Total poin sekarang: %d)\n", pointsReversed, report.SeasonalPoints)
 	} else {
-		msg += fmt.Sprintf("⭐ Total poin sekarang: %d\n", report.TotalPoints)
+		msg += fmt.Sprintf("⭐ Total poin sekarang: %d\n", report.SeasonalPoints)
 	}
 	msg += "\nKalau ingin menghapus semua laporan hari ini, ketik /cancel-all."
 	return msg, nil
@@ -214,7 +214,6 @@ func (uc *CancelReportUsecase) cancelFullDay(ctx context.Context, report *domain
 			LastReportDate:  time.Time{},
 			Streak:          0,
 			MaxStreak:       0,
-			TotalPoints:     0,
 			Achievements:    "",
 			ComebackStreak:  0,
 			InactiveDays:    0,
@@ -230,7 +229,6 @@ func (uc *CancelReportUsecase) cancelFullDay(ctx context.Context, report *domain
 		// are intentionally NOT re-evaluated here: awarding badges during a
 		// cancellation was a backdoor that made retired badges unlockable.
 		newReport = recalculateReportFromDates(report.UserID, report.Name, remainingDates)
-		newReport.TotalPoints = max(0, report.TotalPoints-pointsReversed)
 		newReport.SeasonalPoints = max(0, report.SeasonalPoints-pointsReversed)
 		newReport.SeasonalActivityCount = max(0, report.SeasonalActivityCount-1)
 		newReport.SeasonalMaxStreak = seasonalMaxStreakFromDates(remainingDates, now)
@@ -238,7 +236,6 @@ func (uc *CancelReportUsecase) cancelFullDay(ctx context.Context, report *domain
 		newReport.Achievements = report.Achievements
 		newReport.WalkStepsTotal = max(0, report.WalkStepsTotal-walkReversed)
 		newReport.SeasonalWalkSteps = max(0, report.SeasonalWalkSteps-walkReversed)
-		newReport.Level = domain.NumericLevelFromTotalPoints(newReport.TotalPoints)
 	}
 	preserveNonReportFields(newReport, report)
 
@@ -270,9 +267,9 @@ func (uc *CancelReportUsecase) cancelFullDay(ctx context.Context, report *domain
 	msg += fmt.Sprintf("📅 Total hari aktif: %d\n", newReport.ActivityCount)
 	msg += fmt.Sprintf("🔥 Streak saat ini: %d minggu\n", newReport.Streak)
 	if pointsReversed > 0 {
-		msg += fmt.Sprintf("⭐ Poin dikurangi: -%d (Total poin: %d)\n", pointsReversed, newReport.TotalPoints)
+		msg += fmt.Sprintf("⭐ Poin dikurangi: -%d (Total poin: %d)\n", pointsReversed, newReport.SeasonalPoints)
 	} else {
-		msg += fmt.Sprintf("⭐ Total poin: %d\n", newReport.TotalPoints)
+		msg += fmt.Sprintf("⭐ Total poin: %d\n", newReport.SeasonalPoints)
 	}
 
 	if newReport.InactiveDays > 0 {
@@ -372,12 +369,12 @@ func (uc *CancelReportUsecase) cancelSideQuestToday(ctx context.Context, report 
 	if !cancelAll {
 		msg += fmt.Sprintf("📌 Sisa side quest hari ini: %d/%d\n", remaining, MaxDailySideQuests)
 	}
-	msg += fmt.Sprintf("🧩 Total side quest: %d\n", report.TotalSideQuests)
+	msg += fmt.Sprintf("🧩 Total side quest: %d\n", report.SeasonalSideQuests)
 	if len(revertedNames) > 0 {
 		msg += fmt.Sprintf("↩️ Quest dikembalikan: %s\n", strings.Join(revertedNames, ", "))
 	}
 	if pointsReversed > 0 {
-		msg += fmt.Sprintf("⭐ Poin dikurangi: -%d (Total poin sekarang: %d)\n", pointsReversed, report.TotalPoints)
+		msg += fmt.Sprintf("⭐ Poin dikurangi: -%d (Total poin sekarang: %d)\n", pointsReversed, report.SeasonalPoints)
 	}
 	if !cancelAll {
 		msg += "\nKalau ingin menghapus semua side quest hari ini, ketik /cancel-all sidequest."
@@ -586,15 +583,13 @@ func walkStepsFromEventMetadata(metadataJSON string) int {
 	return m.WalkSteps
 }
 
-// applyPointReversal subtracts reversed points from lifetime and seasonal
-// totals (floored at 0) and re-derives the numeric level.
+// applyPointReversal subtracts reversed points from the seasonal total
+// (floored at 0).
 func applyPointReversal(report *domain.Report, points int) {
 	if points <= 0 {
 		return
 	}
-	report.TotalPoints = max(0, report.TotalPoints-points)
 	report.SeasonalPoints = max(0, report.SeasonalPoints-points)
-	report.Level = domain.NumericLevelFromTotalPoints(report.TotalPoints)
 }
 
 // applyWalkReversal subtracts reversed steps from the profile walk totals
@@ -629,10 +624,6 @@ func seasonalMaxStreakFromDates(dates []time.Time, now time.Time) int {
 }
 
 func decrementSideQuestCount(report *domain.Report, count int) {
-	report.TotalSideQuests -= count
-	if report.TotalSideQuests < 0 {
-		report.TotalSideQuests = 0
-	}
 	report.SeasonalSideQuests -= count
 	if report.SeasonalSideQuests < 0 {
 		report.SeasonalSideQuests = 0
@@ -650,7 +641,6 @@ func preserveNonReportFields(next, current *domain.Report) {
 	next.JobClass = current.JobClass
 	next.StreakFreezes = current.StreakFreezes
 	next.GoalsCompleted = current.GoalsCompleted
-	next.TotalSideQuests = current.TotalSideQuests
 	next.SeasonalSideQuests = current.SeasonalSideQuests
 	// Attributes are preserved as-is on cancellation. Reversing them exactly
 	// requires knowing which attribute each cancelled report granted — that is
@@ -731,7 +721,6 @@ func recalculateReportFromDates(userID, name string, dates []time.Time) *domain.
 		ComebackStreak:  comebackStreak,
 		InactiveDays:    inactiveDays,
 		CenturionCycles: centurionCycles,
-		TotalPoints:     0,
 		Achievements:    "",
 	}
 

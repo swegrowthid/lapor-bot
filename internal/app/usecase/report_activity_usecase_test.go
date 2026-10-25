@@ -217,9 +217,6 @@ func TestStreak_FirstReport(t *testing.T) {
 		t.Errorf("Expected message to contain season badge 'Awakened Hunter', got '%s'", msg)
 	}
 	// Points: 10 base + 5 first season + 10 Awakened Hunter + 25 E-Rank Consistency = 50
-	if r.TotalPoints != 50 {
-		t.Errorf("First report: expected TotalPoints=50, got %d", r.TotalPoints)
-	}
 	if r.SeasonalPoints != 50 {
 		t.Errorf("First report: expected SeasonalPoints=50, got %d", r.SeasonalPoints)
 	}
@@ -365,7 +362,7 @@ func TestReportLimit_IsSeparateFromSideQuestLimit(t *testing.T) {
 	}
 }
 
-func TestReportActivity_AnnouncesLifetimeTierAndSeasonRankUp(t *testing.T) {
+func TestReportActivity_AnnouncesSeasonRankUp(t *testing.T) {
 	repo := &mockRepo{reports: make(map[string]*domain.Report), dailyCounts: make(map[string]int)}
 	uc := usecase.NewReportActivityUsecase(repo)
 	ctx := context.Background()
@@ -376,7 +373,6 @@ func TestReportActivity_AnnouncesLifetimeTierAndSeasonRankUp(t *testing.T) {
 		Streak:                1,
 		ActivityCount:         15,
 		SeasonalActivityCount: 5,
-		TotalPoints:           1149,
 		SeasonalPoints:        149,
 		JobClass:              "fighter",
 		LastReportDate:        now.AddDate(0, 0, -1),
@@ -387,9 +383,6 @@ func TestReportActivity_AnnouncesLifetimeTierAndSeasonRankUp(t *testing.T) {
 		t.Fatalf("Unexpected error: %v", err)
 	}
 
-	if !containsSubstring(msg, "TIER LIFETIME UP") || !containsSubstring(msg, "E-Tier Hunter") || !containsSubstring(msg, "D-Tier Hunter") {
-		t.Fatalf("expected lifetime tier-up announcement, got %q", msg)
-	}
 	if !containsSubstring(msg, "RANK SEASON UP") || !containsSubstring(msg, "Warrior") || !containsSubstring(msg, "Elite") {
 		t.Fatalf("expected season rank-up announcement, got %q", msg)
 	}
@@ -510,7 +503,6 @@ func TestReportActivity_AttributeGainIsConsistentAcrossUsers(t *testing.T) {
 		Streak:                1,
 		ActivityCount:         5,
 		SeasonalActivityCount: 5,
-		TotalPoints:           0,
 		LastReportDate:        lastWeek,
 		Sta:                   3,
 	}
@@ -521,7 +513,6 @@ func TestReportActivity_AttributeGainIsConsistentAcrossUsers(t *testing.T) {
 		Streak:                20,
 		ActivityCount:         80,
 		SeasonalActivityCount: 80,
-		TotalPoints:           5000,
 		LastReportDate:        lastWeek,
 		Sta:                   30,
 	}
@@ -709,7 +700,7 @@ func TestStreak_LongGap_StreakResets(t *testing.T) {
 // Lost 💔: Last report was before yesterday (streak broken)
 //
 // Ranking: By SeasonalPoints, then SeasonalActivityCount, then Name.
-// Lifetime days are displayed separately and include centurion cycles.
+// Total days are displayed separately and include centurion cycles.
 //
 // =============================================================================
 
@@ -767,10 +758,10 @@ func TestLeaderboard_RanksBySeasonPoints(t *testing.T) {
 	}
 
 	// Verify emojis and format
-	if !containsSubstring(result, "HighTotal_LostStreak — 90 pts (4 hari season, 30 hari lifetime, 💔)") {
+	if !containsSubstring(result, "HighTotal_LostStreak — 90 pts (4 hari season, 30 hari total, 💔)") {
 		t.Errorf("Lost streak user should have 💔 emoji in ranking")
 	}
-	if !containsSubstring(result, "MediumTotal_ActiveStreak — 120 pts (2 hari season, 25 hari lifetime, 25 minggu streak 🔥)") {
+	if !containsSubstring(result, "MediumTotal_ActiveStreak — 120 pts (2 hari season, 25 hari total, 25 minggu streak 🔥)") {
 		t.Errorf("Active streak user should have weeks streak and 🔥 emoji")
 	}
 }
@@ -876,8 +867,8 @@ func TestLeaderboard_UsesSeasonSortingAndDisplaysTotalActiveDays(t *testing.T) {
 	if !containsSubstring(result, "[S1-C2] PrestigePlayer") {
 		t.Errorf("Leaderboard should show [S1-C2] badge for the Prestige player")
 	}
-	if !containsSubstring(result, "101 hari lifetime") {
-		t.Errorf("Leaderboard should display centurion-aware lifetime days, got: %s", result)
+	if !containsSubstring(result, "101 hari total") {
+		t.Errorf("Leaderboard should display centurion-aware total days, got: %s", result)
 	}
 }
 
@@ -1061,13 +1052,13 @@ func TestStreakBonus_SideQuestHasNoStreakBonus(t *testing.T) {
 		SeasonalAchievements: allSeasonBadgeIDs(),
 		LastReportDate:       today.AddDate(0, 0, -7),
 	}
-	before := repo.reports["u"].TotalPoints
+	before := repo.reports["u"].SeasonalPoints
 
 	msg, err := uc.ExecuteSideQuest(ctx, "u", "Questor", "Side quest: jalan kaki", 1, 5, 0, time.Now())
 	if err != nil {
 		t.Fatalf("ExecuteSideQuest: %v", err)
 	}
-	gained := repo.reports["u"].TotalPoints - before
+	gained := repo.reports["u"].SeasonalPoints - before
 	// Only the side-quest difficulty points (5) should be awarded — no streak
 	// bonus despite the user having a 30-week streak.
 	if gained != 5 {
@@ -1141,7 +1132,7 @@ func TestReportPoints_RepeatReportHalved(t *testing.T) {
 
 // TestReportActivity_SameDayRepeats_CountOneActiveDay verifies that three
 // accepted regular reports on one calendar day produce exactly ONE active day
-// (lifetime + season) while the 2nd/3rd reports earn the agreed half XP.
+// (season) while the 2nd/3rd reports earn the agreed half XP.
 func TestReportActivity_SameDayRepeats_CountOneActiveDay(t *testing.T) {
 	repo := &mockRepo{
 		reports:       make(map[string]*domain.Report),
@@ -1325,11 +1316,11 @@ func TestReportActivity_SideQuestDoesNotTouchActiveDays(t *testing.T) {
 	if !r.LastReportDate.Equal(lastReport) {
 		t.Errorf("side quest: LastReportDate must not change, got %v", r.LastReportDate)
 	}
-	if r.TotalSideQuests != 2 || r.SeasonalSideQuests != 2 {
-		t.Errorf("side quest: expected 2 completions, got %d/%d", r.TotalSideQuests, r.SeasonalSideQuests)
+	if r.SeasonalSideQuests != 2 {
+		t.Errorf("side quest: expected 2 completions, got %d", r.SeasonalSideQuests)
 	}
-	if r.SeasonalPoints != 5 || r.TotalPoints != 5 {
-		t.Errorf("side quest: expected +5 difficulty points, got season=%d total=%d", r.SeasonalPoints, r.TotalPoints)
+	if r.SeasonalPoints != 5 {
+		t.Errorf("side quest: expected +5 difficulty points, got season=%d", r.SeasonalPoints)
 	}
 }
 

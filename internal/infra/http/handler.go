@@ -179,60 +179,53 @@ type walkStepsRepository interface {
 }
 
 type EnrichedReport struct {
-	UserID                string                      `json:"user_id"`
-	Name                  string                      `json:"name"`
-	JobClass              string                      `json:"job_class"`
-	JobName               string                      `json:"job_name"`
-	JobIcon               string                      `json:"job_icon"`
-	JobDescription        string                      `json:"job_description"`
-	JobTrait              string                      `json:"job_trait"`
-	Streak                int                         `json:"streak"`
-	ActivityCount         int                         `json:"activity_count"`
-	TotalActiveDays       int                         `json:"total_active_days"`
-	LastReportDate        string                      `json:"last_report_date"`
-	MaxStreak             int                         `json:"max_streak"`
-	TotalPoints           int                         `json:"total_points"`
-	Level                 int                         `json:"level"`
-	LevelName             string                      `json:"level_name"`
-	LevelIcon             string                      `json:"level_icon"`
-	XPProgress            domain.NumericLevelProgress `json:"xp_progress"`
-	LevelTierProgress     TierProgress                `json:"level_tier_progress"`
-	Achievements          []string                    `json:"achievements"`
-	ComebackStreak        int                         `json:"comeback_streak"`
-	InactiveDays          int                         `json:"inactive_days"`
-	DaysSinceLastReport   int                         `json:"days_since_last_report"`
-	CenturionCycles       int                         `json:"centurion_cycles"`
-	SeasonalPoints        int                         `json:"seasonal_points"`
-	SeasonalActivityCount int                         `json:"seasonal_activity_count"`
-	SeasonalMaxStreak     int                         `json:"seasonal_max_streak"`
-	SeasonalAchievements  []string                    `json:"seasonal_achievements"`
-	StreakFreezes         int                         `json:"streak_freezes"`
-	GoalsCompleted        int                         `json:"goals_completed"`
-	TotalSideQuests       int                         `json:"total_side_quests"`
-	SeasonalSideQuests    int                         `json:"seasonal_side_quests"`
-	Str                   int                         `json:"str"`
-	Sta                   int                         `json:"sta"`
-	Agi                   int                         `json:"agi"`
-	Vit                   int                         `json:"vit"`
-	End                   int                         `json:"end"`
-	Luk                   int                         `json:"luk"`
-	WalkStepsTotal        int                         `json:"walk_steps_total,omitempty"`
-	SeasonalWalkSteps     int                         `json:"seasonal_walk_steps,omitempty"`
-	WeekWalkSteps         int                         `json:"week_walk_steps,omitempty"`
-	DayWalkSteps          int                         `json:"day_walk_steps,omitempty"`
-	RankName              string                      `json:"rank_name"`
-	RankIcon              string                      `json:"rank_icon"`
-	SeasonRankProgress    TierProgress                `json:"season_rank_progress"`
-	WeekActiveDays        int                         `json:"week_active_days"`
-	WeekActivity          []bool                      `json:"week_activity"`
-	EstimatedWeeklyPoints int                         `json:"estimated_weekly_points"`
-	IsActiveToday         bool                        `json:"is_active_today"`
-	DailyActivity         []DailyActivity             `json:"daily_activity,omitempty"`
-	CurrentDailyStreak    int                         `json:"current_daily_streak,omitempty"`
-	LongestDailyStreak    int                         `json:"longest_daily_streak,omitempty"`
-	ActiveDaysInWindow    int                         `json:"active_days_in_window,omitempty"`
-	ActiveGoal            *PersonalGoal               `json:"active_goal,omitempty"`
-	TodaySideQuests       []domain.QuestTask          `json:"today_side_quests,omitempty"`
+	UserID                string             `json:"user_id"`
+	Name                  string             `json:"name"`
+	JobClass              string             `json:"job_class"`
+	JobName               string             `json:"job_name"`
+	JobIcon               string             `json:"job_icon"`
+	JobDescription        string             `json:"job_description"`
+	JobTrait              string             `json:"job_trait"`
+	Streak                int                `json:"streak"`
+	ActivityCount         int                `json:"activity_count"`
+	TotalActiveDays       int                `json:"total_active_days"`
+	LastReportDate        string             `json:"last_report_date"`
+	MaxStreak             int                `json:"max_streak"`
+	Achievements          []string           `json:"achievements"`
+	ComebackStreak        int                `json:"comeback_streak"`
+	InactiveDays          int                `json:"inactive_days"`
+	DaysSinceLastReport   int                `json:"days_since_last_report"`
+	CenturionCycles       int                `json:"centurion_cycles"`
+	SeasonalPoints        int                `json:"seasonal_points"`
+	SeasonalActivityCount int                `json:"seasonal_activity_count"`
+	SeasonalMaxStreak     int                `json:"seasonal_max_streak"`
+	SeasonalAchievements  []string           `json:"seasonal_achievements"`
+	StreakFreezes         int                `json:"streak_freezes"`
+	GoalsCompleted        int                `json:"goals_completed"`
+	SeasonalSideQuests    int                `json:"seasonal_side_quests"`
+	Str                   int                `json:"str"`
+	Sta                   int                `json:"sta"`
+	Agi                   int                `json:"agi"`
+	Vit                   int                `json:"vit"`
+	End                   int                `json:"end"`
+	Luk                   int                `json:"luk"`
+	WalkStepsTotal        int                `json:"walk_steps_total,omitempty"`
+	SeasonalWalkSteps     int                `json:"seasonal_walk_steps,omitempty"`
+	WeekWalkSteps         int                `json:"week_walk_steps,omitempty"`
+	DayWalkSteps          int                `json:"day_walk_steps,omitempty"`
+	RankName              string             `json:"rank_name"`
+	RankIcon              string             `json:"rank_icon"`
+	SeasonRankProgress    TierProgress       `json:"season_rank_progress"`
+	WeekActiveDays        int                `json:"week_active_days"`
+	WeekActivity          []bool             `json:"week_activity"`
+	EstimatedWeeklyPoints int                `json:"estimated_weekly_points"`
+	IsActiveToday         bool               `json:"is_active_today"`
+	DailyActivity         []DailyActivity    `json:"daily_activity,omitempty"`
+	CurrentDailyStreak    int                `json:"current_daily_streak,omitempty"`
+	LongestDailyStreak    int                `json:"longest_daily_streak,omitempty"`
+	ActiveDaysInWindow    int                `json:"active_days_in_window,omitempty"`
+	ActiveGoal            *PersonalGoal      `json:"active_goal,omitempty"`
+	TodaySideQuests       []domain.QuestTask `json:"today_side_quests,omitempty"`
 }
 
 // TierProgress is precomputed for the web UI so templates/components only render it.
@@ -328,14 +321,6 @@ func buildTierProgress(value, currentMin int, nextMin int, nextName, nextIcon st
 	}
 	progress.Percent = percent
 	return progress
-}
-
-func buildLevelTierProgress(totalPoints int, level domain.Level) TierProgress {
-	next, _ := domain.GetNextLevel(totalPoints)
-	if next == nil {
-		return buildTierProgress(totalPoints, level.MinPoints, level.MinPoints, "", "", true)
-	}
-	return buildTierProgress(totalPoints, level.MinPoints, next.MinPoints, next.Name, next.Icon, false)
 }
 
 func buildSeasonRankProgress(seasonalPoints int, rank domain.Rank) TierProgress {
@@ -521,8 +506,6 @@ func enrichReport(r *domain.Report, today time.Time, weekActivity []bool, weekAc
 }
 
 func enrichReportWithMasking(r *domain.Report, today time.Time, weekActivity []bool, weekActiveDays int, mask bool) EnrichedReport {
-	xpProg := domain.GetNumericLevelProgress(r.TotalPoints)
-	lvl := domain.GetLevel(r.TotalPoints)
 	rank := domain.GetSeasonRank(r.SeasonalPoints)
 
 	jobName := "No Job"
@@ -581,12 +564,6 @@ func enrichReportWithMasking(r *domain.Report, today time.Time, weekActivity []b
 		TotalActiveDays:       r.TotalActiveDays(),
 		LastReportDate:        r.LastReportDate.Format(time.RFC3339),
 		MaxStreak:             r.MaxStreak,
-		TotalPoints:           r.TotalPoints,
-		Level:                 xpProg.Level,
-		LevelName:             lvl.Name,
-		LevelIcon:             lvl.Icon,
-		XPProgress:            xpProg,
-		LevelTierProgress:     buildLevelTierProgress(r.TotalPoints, lvl),
 		Achievements:          achs,
 		ComebackStreak:        r.ComebackStreak,
 		InactiveDays:          r.InactiveDays,
@@ -598,7 +575,6 @@ func enrichReportWithMasking(r *domain.Report, today time.Time, weekActivity []b
 		SeasonalAchievements:  seasonalAchs,
 		StreakFreezes:         r.StreakFreezes,
 		GoalsCompleted:        r.GoalsCompleted,
-		TotalSideQuests:       r.TotalSideQuests,
 		SeasonalSideQuests:    r.SeasonalSideQuests,
 		Str:                   domain.ClampedAttribute(r.Str),
 		Sta:                   domain.ClampedAttribute(r.Sta),
@@ -820,8 +796,7 @@ func (s *Server) HandleGetUser(w http.ResponseWriter, r *http.Request) {
 
 	if strings.TrimSpace(report.JobClass) != "" {
 		questUC := usecase.NewDailyQuestUsecase(s.repo)
-		currentLevel := domain.NumericLevelFromTotalPoints(report.TotalPoints)
-		tasks, err := questUC.GetOrGenerateQuestList(r.Context(), report.UserID, report.JobClass, currentLevel, now)
+		tasks, err := questUC.GetOrGenerateQuestList(r.Context(), report.UserID, report.JobClass, 0, now)
 		if err != nil {
 			s.writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 			return
@@ -1089,8 +1064,7 @@ func (s *Server) HandleGetUserByPhone(w http.ResponseWriter, r *http.Request) {
 
 	if strings.TrimSpace(report.JobClass) != "" {
 		questUC := usecase.NewDailyQuestUsecase(s.repo)
-		currentLevel := domain.NumericLevelFromTotalPoints(report.TotalPoints)
-		tasks, err := questUC.GetOrGenerateQuestList(r.Context(), report.UserID, report.JobClass, currentLevel, now)
+		tasks, err := questUC.GetOrGenerateQuestList(r.Context(), report.UserID, report.JobClass, 0, now)
 		if err != nil {
 			s.writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
 			return

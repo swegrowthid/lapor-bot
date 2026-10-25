@@ -37,10 +37,10 @@ func (uc *JobUsecase) Select(ctx context.Context, userID, name, jobID string) (s
 	const MinPointsToSelectJob = 50
 	points := 0
 	if report != nil {
-		points = report.TotalPoints
+		points = report.SeasonalPoints
 	}
 	if points < MinPointsToSelectJob {
-		return "", fmt.Errorf("🔒 Pilihan Job Belum Terbuka!\n\nKamu harus memiliki minimal %d poin (level up ke Fighter/Tier 2) untuk memilih job. Poinmu saat ini: %d.\nKumpulkan poin dengan melapor latihan menggunakan #lapor! 💪", MinPointsToSelectJob, points)
+		return "", fmt.Errorf("🔒 Pilihan Job Belum Terbuka!\n\nKamu harus memiliki minimal %d poin season untuk memilih job. Poinmu saat ini: %d.\nKumpulkan poin dengan melapor latihan menggunakan #lapor! 💪", MinPointsToSelectJob, points)
 	}
 
 	if report == nil {

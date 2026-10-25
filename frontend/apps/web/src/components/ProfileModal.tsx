@@ -38,13 +38,6 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
   if (!hunter) return null;
 
-  const xpPercent = Math.min(
-    100,
-    Math.round(
-      (hunter.xp_progress.CurrentXP / hunter.xp_progress.RequiredXP) * 100,
-    ),
-  );
-
   const getRankGlow = (rankName: string) => {
     if (rankName.includes("S-Rank") || rankName.includes("Monarch"))
       return "glass-glow-gold";
@@ -94,30 +87,30 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
 
         {/* Content Layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Left Side: RPG Level & Stats */}
+          {/* Left Side: Season Rank & Stats */}
           <div className="space-y-6">
-            {/* Level Panel */}
+            {/* Season Rank Panel */}
             <div className="bg-gray-900/50 border border-gray-800 p-5 rounded-2xl">
               <div className="flex justify-between items-center mb-3">
                 <div>
                   <span className="text-xs text-system-blue font-mono font-bold uppercase tracking-widest">
-                    Level Progress
+                    Season Rank
                   </span>
                   <div className="flex items-baseline gap-1 mt-1">
                     <span className="text-3xl font-black font-orbitron text-white">
-                      Lv.{hunter.level}
+                      {hunter.rank_icon}
                     </span>
                     <span className="text-xs text-gray-400 font-mono">
-                      ({hunter.level_name} {hunter.level_icon})
+                      ({hunter.rank_name})
                     </span>
                   </div>
                 </div>
                 <div className="text-right">
                   <span className="text-xs text-gray-400 font-mono block">
-                    Lifetime XP
+                    Season Points
                   </span>
                   <span className="text-sm font-bold font-orbitron text-white mt-1 block">
-                    {hunter.total_points} PTS
+                    {hunter.seasonal_points} PTS
                   </span>
                 </div>
               </div>
@@ -126,13 +119,18 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
               <div className="w-full bg-gray-800 h-3.5 rounded-full overflow-hidden p-[2px]">
                 <div
                   className="bg-gradient-to-r from-system-blue to-system-purple h-full rounded-full transition-all duration-500 ease-out shadow-neon-blue"
-                  style={{ width: `${xpPercent}%` }}
+                  style={{ width: `${hunter.season_rank_progress.percent}%` }}
                 ></div>
               </div>
               <div className="flex justify-between items-center text-[10px] text-gray-400 font-mono mt-2">
-                <span>{hunter.xp_progress.CurrentXP} XP</span>
-                <span className="text-system-blue font-bold">{xpPercent}%</span>
-                <span>{hunter.xp_progress.RequiredXP} XP</span>
+                <span>
+                  {hunter.season_rank_progress.is_max
+                    ? "Max rank season ini"
+                    : `${hunter.season_rank_progress.remaining} pts lagi`}
+                </span>
+                <span className="text-system-blue font-bold">
+                  {hunter.season_rank_progress.percent}%
+                </span>
               </div>
             </div>
 
@@ -205,10 +203,10 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                   Side Quests
                 </span>
                 <span className="text-xl font-bold font-orbitron text-system-blue mt-1 block">
-                  {hunter.total_side_quests}
+                  {hunter.seasonal_side_quests}
                 </span>
                 <span className="text-[9px] text-gray-500 font-mono block">
-                  ({hunter.seasonal_side_quests} this season)
+                  this season
                 </span>
               </div>
               <div className="text-center p-3 bg-gray-950/40 rounded-xl">
@@ -321,12 +319,12 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({
                   </p>
                 ) : (
                   <>
-                    {/* Lifetime Badges */}
+                    {/* All-time Badges */}
                     {hunter.achievements.map((badge, idx) => (
                       <div
                         key={`life-${idx}`}
                         className="flex items-center gap-1 text-[10px] font-mono font-semibold px-2 py-1 rounded-md bg-gray-900 border border-gray-700 text-gray-300"
-                        title="Lifetime Badge"
+                        title="All-time Badge"
                       >
                         <Award size={10} className="text-system-gold" />
                         {badge}

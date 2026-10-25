@@ -94,7 +94,7 @@ const WHATSAPP_CATEGORIES: CommandCategory[] = [
         aliases: ["#lapor sidequest"],
         description:
           "Lihat daftar side quest easy, medium, dan hard hari ini untuk profilmu.",
-        note: "Easy: jalan kaki min 4.000 langkah atau sepeda 5 km. Medium/hard: latihan ringan yang naik sedikit sesuai level job.",
+        note: "Easy: jalan kaki min 4.000 langkah atau sepeda 5 km. Medium/hard: latihan ringan yang naik sedikit sesuai rank job.",
       },
       {
         syntax: "/lapor sidequest [kegiatan] [jumlah]",
@@ -528,7 +528,7 @@ export function CommandsPage({ onBack }: CommandsPageProps) {
         </div>
       </div>
 
-      {/* Platform toggle — mirrors the ProgramTabBar pill pattern */}
+      {/* Platform toggle — pill tab pattern */}
       <div
         role="tablist"
         aria-label="Pilih platform panduan"

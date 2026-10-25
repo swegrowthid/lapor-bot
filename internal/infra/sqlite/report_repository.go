@@ -24,12 +24,12 @@ func NewReportRepository(db *sql.DB) *ReportRepository {
 }
 
 const selectColumns = `user_id, name, COALESCE(job_class, ''), streak, activity_count, last_report_date, 
-	COALESCE(max_streak, 0), COALESCE(total_points, 0), COALESCE(level, 0), COALESCE(achievements, ''),
+	COALESCE(max_streak, 0), COALESCE(achievements, ''),
 	COALESCE(comeback_streak, 0), COALESCE(inactive_days, 0), COALESCE(centurion_cycles, 0),
 	COALESCE(seasonal_points, 0), COALESCE(seasonal_activity_count, 0),
 	COALESCE(seasonal_max_streak, 0), COALESCE(seasonal_achievements, ''),
 	COALESCE(streak_freezes, 0), COALESCE(goals_completed, 0),
-	COALESCE(total_side_quests, 0), COALESCE(seasonal_side_quests, 0),
+	COALESCE(seasonal_side_quests, 0),
 	COALESCE(walk_steps_total, 0), COALESCE(seasonal_walk_steps, 0),
 	COALESCE(str, 0), COALESCE(sta, 0), COALESCE(agi, 0), COALESCE(vit, 0),
 	COALESCE(endurance, 0), COALESCE(luk, 0)`
@@ -39,12 +39,12 @@ func scanReport(scanner interface{ Scan(dest ...any) error }) (*domain.Report, e
 	var lastReportDate string
 	err := scanner.Scan(
 		&report.UserID, &report.Name, &report.JobClass, &report.Streak, &report.ActivityCount,
-		&lastReportDate, &report.MaxStreak, &report.TotalPoints, &report.Level, &report.Achievements,
+		&lastReportDate, &report.MaxStreak, &report.Achievements,
 		&report.ComebackStreak, &report.InactiveDays, &report.CenturionCycles,
 		&report.SeasonalPoints, &report.SeasonalActivityCount,
 		&report.SeasonalMaxStreak, &report.SeasonalAchievements,
 		&report.StreakFreezes, &report.GoalsCompleted,
-		&report.TotalSideQuests, &report.SeasonalSideQuests,
+		&report.SeasonalSideQuests,
 		&report.WalkStepsTotal, &report.SeasonalWalkSteps,
 		&report.Str, &report.Sta, &report.Agi, &report.Vit,
 		&report.End, &report.Luk,
@@ -76,8 +76,8 @@ func upsertReport(ctx context.Context, execer execContexter, report *domain.Repo
 	// of which usecase produced the Report.
 	report.EnsureAttributeBaseline()
 	query := `
-		INSERT INTO user_reports (user_id, name, job_class, streak, activity_count, last_report_date, max_streak, total_points, level, achievements, comeback_streak, inactive_days, centurion_cycles, seasonal_points, seasonal_activity_count, seasonal_max_streak, seasonal_achievements, streak_freezes, goals_completed, total_side_quests, seasonal_side_quests, walk_steps_total, seasonal_walk_steps, str, sta, agi, vit, endurance, luk)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		INSERT INTO user_reports (user_id, name, job_class, streak, activity_count, last_report_date, max_streak, achievements, comeback_streak, inactive_days, centurion_cycles, seasonal_points, seasonal_activity_count, seasonal_max_streak, seasonal_achievements, streak_freezes, goals_completed, seasonal_side_quests, walk_steps_total, seasonal_walk_steps, str, sta, agi, vit, endurance, luk)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		ON CONFLICT(user_id) DO UPDATE SET
 			name = excluded.name,
 			job_class = excluded.job_class,
@@ -85,8 +85,6 @@ func upsertReport(ctx context.Context, execer execContexter, report *domain.Repo
 			activity_count = excluded.activity_count,
 			last_report_date = excluded.last_report_date,
 			max_streak = excluded.max_streak,
-			total_points = excluded.total_points,
-			level = excluded.level,
 			achievements = excluded.achievements,
 			comeback_streak = excluded.comeback_streak,
 			inactive_days = excluded.inactive_days,
@@ -96,7 +94,6 @@ func upsertReport(ctx context.Context, execer execContexter, report *domain.Repo
 			seasonal_max_streak = excluded.seasonal_max_streak,
 			seasonal_achievements = excluded.seasonal_achievements,
 			streak_freezes = excluded.streak_freezes,
-			total_side_quests = excluded.total_side_quests,
 			seasonal_side_quests = excluded.seasonal_side_quests,
 			walk_steps_total = excluded.walk_steps_total,
 			seasonal_walk_steps = excluded.seasonal_walk_steps,
@@ -109,11 +106,11 @@ func upsertReport(ctx context.Context, execer execContexter, report *domain.Repo
 	`
 	_, err := execer.ExecContext(ctx, query,
 		report.UserID, report.Name, report.JobClass, report.Streak, report.ActivityCount,
-		report.LastReportDate.Format(time.RFC3339), report.MaxStreak, report.TotalPoints,
-		report.Level, report.Achievements, report.ComebackStreak, report.InactiveDays, report.CenturionCycles,
+		report.LastReportDate.Format(time.RFC3339), report.MaxStreak,
+		report.Achievements, report.ComebackStreak, report.InactiveDays, report.CenturionCycles,
 		report.SeasonalPoints, report.SeasonalActivityCount, report.SeasonalMaxStreak,
 		report.SeasonalAchievements, report.StreakFreezes, report.GoalsCompleted,
-		report.TotalSideQuests, report.SeasonalSideQuests,
+		report.SeasonalSideQuests,
 		report.WalkStepsTotal, report.SeasonalWalkSteps,
 		report.Str, report.Sta, report.Agi, report.Vit,
 		report.End, report.Luk,
@@ -443,18 +440,29 @@ func (r *ReportRepository) GetInactiveUsers(ctx context.Context, days int) ([]*d
 	return scanReports(rows)
 }
 
-// ResetSeasonalCounters clears only seasonal data, preserving lifetime progress.
-// This replaces the old destructive reset that deleted all user data.
+// ResetAllReports wipes all progress for the new season.
 func (r *ReportRepository) ResetAllReports(ctx context.Context) error {
+	// Season reset is now a full wipe of all progress: points, streaks,
+	// badges, quests, attributes, and centurion cycles all start from zero.
 	_, err := r.db.ExecContext(ctx, `
 		UPDATE user_reports
-		SET seasonal_points = 0,
+		SET streak = 0,
+		    activity_count = 0,
+		    max_streak = 0,
+		    achievements = '',
+		    comeback_streak = 0,
+		    inactive_days = 0,
+		    centurion_cycles = 0,
+		    seasonal_points = 0,
 		    seasonal_activity_count = 0,
 		    seasonal_max_streak = 0,
 		    seasonal_achievements = '',
+		    streak_freezes = 1,
+		    goals_completed = 0,
 		    seasonal_side_quests = 0,
+		    walk_steps_total = 0,
 		    seasonal_walk_steps = 0,
-		    streak_freezes = 1
+		    str = 0, sta = 0, agi = 0, vit = 0, endurance = 0, luk = 0
 	`)
 	return err
 }
@@ -601,8 +609,6 @@ func (r *ReportRepository) InitTable(ctx context.Context) error {
 	_, _ = r.db.ExecContext(ctx, "ALTER TABLE user_reports ADD COLUMN activity_count INTEGER DEFAULT 0")
 	_, _ = r.db.ExecContext(ctx, "ALTER TABLE user_reports ADD COLUMN job_class TEXT DEFAULT ''")
 	_, _ = r.db.ExecContext(ctx, "ALTER TABLE user_reports ADD COLUMN max_streak INTEGER DEFAULT 0")
-	_, _ = r.db.ExecContext(ctx, "ALTER TABLE user_reports ADD COLUMN total_points INTEGER DEFAULT 0")
-	_, _ = r.db.ExecContext(ctx, "ALTER TABLE user_reports ADD COLUMN level INTEGER DEFAULT 0")
 	_, _ = r.db.ExecContext(ctx, "ALTER TABLE user_reports ADD COLUMN achievements TEXT DEFAULT ''")
 	_, _ = r.db.ExecContext(ctx, "ALTER TABLE user_reports ADD COLUMN comeback_streak INTEGER DEFAULT 0")
 	_, _ = r.db.ExecContext(ctx, "ALTER TABLE user_reports ADD COLUMN inactive_days INTEGER DEFAULT 0")
@@ -613,7 +619,6 @@ func (r *ReportRepository) InitTable(ctx context.Context) error {
 	_, _ = r.db.ExecContext(ctx, "ALTER TABLE user_reports ADD COLUMN seasonal_achievements TEXT DEFAULT ''")
 	_, _ = r.db.ExecContext(ctx, "ALTER TABLE user_reports ADD COLUMN streak_freezes INTEGER DEFAULT 1")
 	_, _ = r.db.ExecContext(ctx, "ALTER TABLE user_reports ADD COLUMN goals_completed INTEGER DEFAULT 0")
-	_, _ = r.db.ExecContext(ctx, "ALTER TABLE user_reports ADD COLUMN total_side_quests INTEGER DEFAULT 0")
 	_, _ = r.db.ExecContext(ctx, "ALTER TABLE user_reports ADD COLUMN seasonal_side_quests INTEGER DEFAULT 0")
 	_, _ = r.db.ExecContext(ctx, "ALTER TABLE user_reports ADD COLUMN str INTEGER DEFAULT 1")
 	_, _ = r.db.ExecContext(ctx, "ALTER TABLE user_reports ADD COLUMN sta INTEGER DEFAULT 1")
@@ -699,9 +704,6 @@ func (r *ReportRepository) InitTable(ctx context.Context) error {
 		return err
 	}
 	if err := r.MigrateCenturionPrestige(ctx); err != nil {
-		return err
-	}
-	if err := r.MigrateNumericLevels(ctx); err != nil {
 		return err
 	}
 
@@ -819,56 +821,6 @@ func (r *ReportRepository) MigrateCenturionPrestige(ctx context.Context) error {
 
 	_, err = r.db.ExecContext(ctx, "INSERT INTO sys_migrations (name) VALUES ('centurion_prestige_v1')")
 	return err
-}
-
-func (r *ReportRepository) MigrateNumericLevels(ctx context.Context) error {
-	var exists int
-	err := r.db.QueryRowContext(ctx, "SELECT COUNT(*) FROM sys_migrations WHERE name = 'numeric_level_v1'").Scan(&exists)
-	if err != nil {
-		return err
-	}
-	if exists > 0 {
-		return nil
-	}
-
-	rows, err := r.db.QueryContext(ctx, `SELECT user_id, COALESCE(total_points, 0) FROM user_reports`)
-	if err != nil {
-		return err
-	}
-	defer rows.Close()
-
-	type levelUpdate struct {
-		userID string
-		level  int
-	}
-	var updates []levelUpdate
-	for rows.Next() {
-		var userID string
-		var totalPoints int
-		if err := rows.Scan(&userID, &totalPoints); err != nil {
-			return err
-		}
-		updates = append(updates, levelUpdate{userID: userID, level: domain.NumericLevelFromTotalPoints(totalPoints)})
-	}
-	if err := rows.Err(); err != nil {
-		return err
-	}
-
-	tx, err := r.db.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-	for _, update := range updates {
-		if _, err := tx.ExecContext(ctx, `UPDATE user_reports SET level = ? WHERE user_id = ?`, update.level, update.userID); err != nil {
-			_ = tx.Rollback()
-			return err
-		}
-	}
-	if _, err := tx.ExecContext(ctx, "INSERT INTO sys_migrations (name) VALUES ('numeric_level_v1')"); err != nil {
-		_ = tx.Rollback()
-		return err
-	}
-	return tx.Commit()
 }
 
 // ResolveLIDToPhone looks up a LID in the whatsmeow_lid_map table and returns the phone number.
@@ -1569,7 +1521,7 @@ func (r *ReportRepository) SubtractWalkSteps(ctx context.Context, userID string,
 }
 
 // GetWalkStepsTotals aggregates steps per user since the given date
-// (zero time = lifetime). Rows are ordered by steps DESC for direct
+// (zero time = all-time). Rows are ordered by steps DESC for direct
 // leaderboard consumption.
 func (r *ReportRepository) GetWalkStepsTotals(ctx context.Context, since time.Time) ([]domain.WalkStepsEntry, error) {
 	query := `

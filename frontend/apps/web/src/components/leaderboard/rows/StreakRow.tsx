@@ -57,7 +57,7 @@ export const StreakRow: React.FC<StreakRowProps> = ({
       </td>
       <td className="py-4 pl-4 text-center align-middle font-mono text-sm text-gray-300">
         <span className="font-bold">{hunter.total_active_days}</span>
-        <span className="text-[10px] text-gray-500"> hari lifetime</span>
+        <span className="text-[10px] text-gray-500"> hari</span>
       </td>
       <td className="py-4 pl-4 text-center align-middle font-mono text-sm text-gray-300">
         <span className="font-bold text-system-purple">

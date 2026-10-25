@@ -30,8 +30,7 @@ func (u *WeeklyHunterRanksAnnouncementUsecase) Execute(ctx context.Context, now 
 
 	var sb strings.Builder
 	sb.WriteString("📢 *PENGUMUMAN MINGGUAN: RANK & JOB HUNTER* 🏹\n")
-	sb.WriteString(fmt.Sprintf("Season %d | Reset badge/rank: %s\n", seasonNumber, nextReset.Format("02-01-2006")))
-	sb.WriteString("Level & EXP lifetime tetap aman.\n\n")
+	sb.WriteString(fmt.Sprintf("Season %d | Reset badge/rank: %s\n\n", seasonNumber, nextReset.Format("02-01-2006")))
 
 	rank := 1
 	for _, r := range reports {

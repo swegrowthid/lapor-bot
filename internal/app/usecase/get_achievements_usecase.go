@@ -28,7 +28,7 @@ func (uc *GetAchievementsUsecase) Execute(ctx context.Context) (string, error) {
 		return "Belum ada member yang aktif.", nil
 	}
 
-	// Calculate season badge stats. Lifetime achievements are preserved in the
+	// Calculate season badge stats. All-time achievements are preserved in the
 	// database, but the visible badge race resets every season.
 	stats := make(map[string]int)
 	goalTotal := 0
@@ -48,7 +48,7 @@ func (uc *GetAchievementsUsecase) Execute(ctx context.Context) (string, error) {
 
 	sb := strings.Builder{}
 	sb.WriteString(fmt.Sprintf("🎖️ *Season Badge Challenge — Season %d*\n", seasonNumber))
-	sb.WriteString("Badge di bawah ini reset setiap season. Level & EXP lifetime tetap aman.\n")
+	sb.WriteString("Badge di bawah ini reset setiap season.\n")
 	sb.WriteString("Notifikasi #lapor hanya menampilkan badge terbaru; detail lengkapnya ada di sini.\n\n")
 
 	for _, ach := range domain.AllSeasonAchievements {
@@ -87,8 +87,6 @@ func (uc *GetAchievementsUsecase) Execute(ctx context.Context) (string, error) {
 	sb.WriteString(fmt.Sprintf("🏹 Total side quest selesai season ini: %d\n", sideQuestTotal))
 	sb.WriteString("   Syarat: sudah memilih job, cek `#mysidequest`, lalu lapor dengan `#lapor sidequest <kegiatan> <jumlah>`.\n")
 	sb.WriteString("   Reward side quest hanya ½ XP, tapi tetap dihitung ke streak, stats, leaderboard, dan goal.\n\n")
-
-	sb.WriteString("⚔️ Level numerik naik dari total EXP lifetime. Semakin tinggi level, semakin banyak EXP yang dibutuhkan.")
 
 	return sb.String(), nil
 }

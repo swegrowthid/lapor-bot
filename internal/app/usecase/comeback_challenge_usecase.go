@@ -33,7 +33,6 @@ func (uc *ComebackChallengeUsecase) Execute(ctx context.Context, userID, name st
 		sb.WriteString("Kamu belum pernah absen lama. Pertahankan streak-mu! 🔥\n\n")
 		sb.WriteString(fmt.Sprintf("🔥 Streak saat ini: %d minggu\n", report.Streak))
 		sb.WriteString(fmt.Sprintf("📅 Total hari aktif: %d\n", report.ActivityCount))
-		sb.WriteString(fmt.Sprintf("🎖️ Level: %s\n", domain.FormatLevel(report.TotalPoints)))
 		return sb.String(), nil
 	}
 
@@ -58,9 +57,6 @@ func (uc *ComebackChallengeUsecase) Execute(ctx context.Context, userID, name st
 			sb.WriteString(fmt.Sprintf("  🔒 %s — butuh absen >%d hari (%d pts)\n", a.Name, a.MinInactiveDays, a.Points))
 		}
 	}
-
-	sb.WriteString(fmt.Sprintf("\n📊 Level: %s\n", domain.FormatLevel(report.TotalPoints)))
-	sb.WriteString(fmt.Sprintf("📈 %s\n", domain.FormatProgressBar(report.TotalPoints)))
 
 	// Motivational closer — draw from the shared 345-quote pool so the message
 	// stays fresh across requests without bloating the package with another

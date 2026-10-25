@@ -45,13 +45,13 @@ export const HunterCard: React.FC<HunterCardProps> = ({ hunter, onClick }) => {
 
       {/* Card Content */}
       <div>
-        {/* Level and Title */}
+        {/* Rank and Points */}
         <div className="flex justify-between items-center mb-3">
           <span className="text-[10px] text-gray-500 font-mono tracking-widest uppercase">
             {hunter.rank_name}
           </span>
           <span className="text-xs font-bold font-orbitron text-system-volt tnum">
-            Lv.{hunter.level}
+            {hunter.seasonal_points} pts
           </span>
         </div>
 

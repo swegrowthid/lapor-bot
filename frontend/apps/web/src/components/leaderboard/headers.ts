@@ -10,25 +10,13 @@ export const SEASONAL_HEADERS = [
   "Season Points + Progress",
 ] as const;
 
-export const LIFETIME_HEADERS = [
-  "Rank",
-  "Hunter",
-  "Job",
-  "Level Tier",
-  "Level",
-  "XP Progress",
-  "Lifetime Days",
-  "Best Streak",
-  "Quests Done",
-] as const;
-
 export const STREAK_HEADERS = [
   "Rank",
   "Hunter",
   "Job",
   "Current Streak",
   "Best Streak",
-  "Lifetime Days",
+  "Total Days",
   "Comeback",
   "Centurion",
   "Status",
@@ -50,7 +38,7 @@ export const WALK_HEADERS = [
   "Job",
   "Langkah Minggu Ini",
   "Langkah Season",
-  "Lifetime Langkah",
+  "Langkah Total",
 ] as const;
 
 export const ATTRIBUTE_HEADERS = [
@@ -62,5 +50,4 @@ export const ATTRIBUTE_HEADERS = [
   "STA",
   "AGI",
   "VIT",
-  "Level",
 ] as const;

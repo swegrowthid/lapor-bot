@@ -10,14 +10,12 @@ export { QuestBadge } from "./QuestBadge";
 
 export { WalkRow } from "./rows/WalkRow";
 export { SeasonalRow } from "./rows/SeasonalRow";
-export { LifetimeRow } from "./rows/LifetimeRow";
 export { StreakRow } from "./rows/StreakRow";
 export { WeekRow } from "./rows/WeekRow";
 export { AttributeRow } from "./rows/AttributeRow";
 
 export {
   SEASONAL_HEADERS,
-  LIFETIME_HEADERS,
   STREAK_HEADERS,
   WALK_HEADERS,
   WEEK_HEADERS,

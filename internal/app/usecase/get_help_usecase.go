@@ -89,8 +89,6 @@ func (uc *GetHelpUsecase) ExecuteTutorial() string {
 		msg += fmt.Sprintf("%d. %s *%s*\n%s\n\n", i+1, section.emoji, section.title, section.content)
 	}
 
-	msg += "⚔️ *Level Numerik*\n"
-	msg += "Level lifetime dimulai dari Lv.0 dan naik dari total points/EXP. Semakin tinggi level, semakin banyak EXP yang dibutuhkan untuk naik level. Season boleh reset, tapi level lifetime tetap lanjut.\n\n"
 	msg += "🏅 *Badge*\n"
 	msg += "Notifikasi /lapor hanya menampilkan badge terbaru supaya ringkas. Detail lengkap bisa dicek di web.\n\n"
 	msg += "✨ *Flow Side Quest Harian*\n"
