@@ -20,13 +20,12 @@ import {
 import { useState, useRef } from "react";
 import {
   useRepositories,
-  getJobColor,
   clampAttribute,
   attributeBarWidth,
 } from "@lapor-bot/shared";
-import { QuickReport } from "@lapor-bot/ui";
-import type { QuickReportCallbacks } from "@lapor-bot/ui";
-import { StravaConnectPanel } from "@lapor-bot/ui";
+import { QuickReport } from "../QuickReport";
+import type { QuickReportCallbacks } from "../QuickReport";
+import { StravaConnectPanel } from "../StravaConnectPanel";
 import type {
   DailyActivity,
   EnrichedReport,
@@ -42,7 +41,7 @@ interface PersonalPageProps {
   user: EnrichedReport;
   /**
    * Navigate back to the leaderboard without ending the session.
-   * This is pure navigation — the user stays logged in.
+   * This is pure navigation - the user stays logged in.
    */
   onBack: () => void;
   /**
@@ -52,13 +51,23 @@ interface PersonalPageProps {
   onUserRefresh?: (user: EnrichedReport) => void;
 }
 
-function getRankGlow(rankName: string) {
-  if (rankName.includes("S-Rank") || rankName.includes("Monarch"))
-    return "glass-glow-gold";
-  if (rankName.includes("A-Rank")) return "glass-glow-purple";
-  if (rankName.includes("B-Rank") || rankName.includes("C-Rank"))
-    return "glass-glow-blue";
-  return "glass-glow-blue";
+function jobTone(jobId: string) {
+  switch (jobId?.toLowerCase()) {
+    case "fighter":
+      return "bg-danger-soft text-danger";
+    case "tank":
+      return "bg-gold-soft text-gold";
+    case "assassin":
+      return "bg-info-soft text-info";
+    case "mage":
+      return "bg-danger-soft text-danger";
+    case "ranger":
+      return "bg-info-soft text-info";
+    case "healer":
+      return "bg-positive-soft text-positive";
+    default:
+      return "bg-panel-raised text-ink-soft";
+  }
 }
 
 function formatQuestDifficulty(difficulty: string) {
@@ -150,18 +159,16 @@ function buildOptimisticGoal(
 function StatCard({
   label,
   value,
-  tone = "text-white",
+  tone = "text-ink",
 }: {
   label: string;
   value: string | number;
   tone?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-gray-800/50 bg-gray-950/50 p-4">
-      <div className={`text-xl font-black font-orbitron ${tone}`}>{value}</div>
-      <div className="mt-1 text-[10px] text-gray-500 font-mono uppercase tracking-wider">
-        {label}
-      </div>
+    <div className="rounded-lg border border-border bg-panel shadow-xs p-4">
+      <div className={`text-xl font-bold tabular-nums ${tone}`}>{value}</div>
+      <div className="mt-1 text-xs text-ink-muted">{label}</div>
     </div>
   );
 }
@@ -239,7 +246,6 @@ export function PersonalPage({
     throw lastError;
   };
 
-  const glowClass = getRankGlow(localUser.rank_name);
   const sideQuests = localUser.today_side_quests ?? [];
   const dailyActivity = localUser.daily_activity ?? [];
   const activeGoal = localUser.active_goal;
@@ -273,17 +279,17 @@ export function PersonalPage({
           {/* Navigation: back to leaderboard, session preserved */}
           <button
             onClick={onBack}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-950 hover:bg-gray-900 border border-gray-800 text-gray-400 hover:text-white font-mono text-xs transition-colors"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border bg-panel hover:bg-panel-raised text-xs text-ink-soft hover:text-ink transition-colors min-h-[44px]"
             title="Kembali ke leaderboard"
           >
             <ArrowLeft size={14} />
             Kembali
           </button>
 
-          {/* Account action: end session — visually distinct from navigation */}
+          {/* Account action: end session - visually distinct from navigation */}
           <button
             onClick={onLogout}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl bg-system-red/10 hover:bg-system-red/20 border border-system-red/20 text-system-red font-mono text-xs transition-colors"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl border border-danger/40 bg-danger-soft text-xs text-danger transition-colors min-h-[44px]"
             title="Keluar dari akun"
           >
             <LogOut size={14} />
@@ -292,20 +298,19 @@ export function PersonalPage({
         </div>
 
         <section
-          className={`relative overflow-hidden glass rounded-[2rem] p-4 sm:p-6 md:p-8 mb-6 ${glowClass}`}
+          className="rounded-xl border border-border bg-panel shadow-xs p-4 sm:p-6 md:p-8 mb-6"
         >
-          <div className="absolute right-0 top-0 h-36 w-36 rounded-full bg-system-green/10 blur-3xl" />
-          <div className="relative grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
+          <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-3xl bg-gray-950 border border-gray-800 flex items-center justify-center text-3xl shrink-0 shadow-neon-purple">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg bg-page-sunken border border-border flex items-center justify-center text-3xl shrink-0">
                 {localUser.job_icon}
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] text-system-green font-mono uppercase tracking-[0.3em]">
+                <p className="text-xs font-medium text-accent">
                   Personal Hunter Profile
                 </p>
                 <div className="flex items-center gap-2">
-                  <h2 className="mt-2 text-2xl sm:text-3xl md:text-4xl font-black font-orbitron text-white tracking-wide truncate">
+                  <h2 className="mt-2 text-2xl sm:text-3xl md:text-4xl font-bold text-ink tracking-tight truncate">
                     {localUser.name}
                   </h2>
                   <button
@@ -314,7 +319,7 @@ export function PersonalPage({
                       setNameValue(localUser.name || "");
                       setNameError(null);
                     }}
-                    className="mt-2 text-xs px-2 py-1 rounded-lg border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 font-mono"
+                    className="mt-2 inline-flex h-8 w-8 items-center justify-center rounded-md border border-border text-ink-muted hover:bg-panel-raised hover:text-ink transition-colors"
                     title="Ubah nama"
                   >
                     <Edit2 size={14} />
@@ -325,7 +330,7 @@ export function PersonalPage({
                     <input
                       value={nameValue}
                       onChange={(e) => setNameValue(e.target.value)}
-                      className="px-3 py-1.5 rounded-xl bg-gray-950 border border-gray-800 text-sm font-mono text-white"
+                      className="min-w-0 flex-1 px-3 py-1.5 rounded-md bg-page-sunken border border-border text-sm text-ink placeholder:text-ink-muted focus:border-border-strong"
                       placeholder="Nama hunter"
                     />
                     <button
@@ -350,63 +355,63 @@ export function PersonalPage({
                           setNameLoading(false);
                         }
                       }}
-                      className="px-3 py-1.5 rounded-xl bg-system-green text-gray-950 text-xs font-bold"
+                      className="px-3 py-1.5 rounded-md bg-accent text-accent-fg text-xs font-semibold transition-colors hover:bg-accent/90"
                     >
                       {nameLoading ? "..." : "Simpan"}
                     </button>
                     <button
                       onClick={() => setEditingName(false)}
-                      className="px-2 py-1.5 text-xs text-gray-400"
+                      className="px-2 py-1.5 text-xs text-ink-muted hover:text-ink rounded-md"
                     >
                       Batal
                     </button>
                   </div>
                 )}
                 {nameError && (
-                  <p className="text-[10px] text-system-red mt-1">
+                  <p className="text-xs text-danger mt-1">
                     {nameError}
                   </p>
                 )}
-                <p className="text-sm text-gray-400 font-mono mt-1">
+                <p className="text-sm text-ink-soft mt-1">
                   {localUser.job_name} • {localUser.rank_icon}{" "}
                   {localUser.rank_name}
                 </p>
-                <p className="text-[10px] text-gray-600 font-mono mt-1">
+                <p className="text-xs text-ink-muted mt-1 tabular-nums">
                   {localUser.user_id}
                 </p>
               </div>
             </div>
 
-            <div className="rounded-3xl border border-gray-800 bg-gray-950/50 p-4">
+            <div className="rounded-xl border border-border bg-panel-raised p-4">
               <div className="flex items-center justify-between gap-4 mb-3">
                 <div>
-                  <p className="text-[10px] text-gray-500 font-mono uppercase tracking-wider">
+                  <p className="text-xs font-medium text-ink-muted">
                     Season Rank
                   </p>
-                  <p className="text-lg font-bold font-orbitron text-white">
+                  <p className="text-lg font-bold text-ink">
                     {localUser.rank_icon} {localUser.rank_name}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xl font-black font-orbitron text-system-gold">
+                  <p className="text-xl font-bold text-ink tabular-nums">
                     {localUser.seasonal_points}
                   </p>
-                  <p className="text-[10px] text-gray-500 font-mono uppercase">
+                  <p className="text-xs text-ink-muted">
                     Season Points
                   </p>
                 </div>
               </div>
-              <div className="h-3 rounded-full bg-gray-900 border border-gray-800 overflow-hidden p-[2px]">
+              <div className="h-3 rounded-full bg-page-sunken overflow-hidden p-[2px]">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-system-blue to-system-green"
+                  className="h-full rounded-full bg-accent"
                   style={{
                     width: `${localUser.season_rank_progress.percent}%`,
                   }}
                 />
               </div>
-              <div className="mt-2 flex justify-between text-[10px] text-gray-500 font-mono">
+              <div className="mt-2 flex justify-between text-xs text-ink-muted tabular-nums">
                 <span>{localUser.season_rank_progress.remaining} pts lagi</span>
-                <span className="text-system-blue font-bold">
+                <span className="text-accent font-semibold">
                   {localUser.season_rank_progress.is_max
                     ? "MAX"
                     : `${localUser.season_rank_progress.percent}%`}
@@ -434,50 +439,50 @@ export function PersonalPage({
             <StatCard
               label="Season Points"
               value={localUser.seasonal_points}
-              tone="text-system-gold"
+              tone="text-gold"
             />
             <StatCard
               label="Daily Streak"
               value={`${localUser.current_daily_streak ?? 0} hari`}
-              tone="text-system-red"
+              tone="text-positive"
             />
             <StatCard
               label="Weekly Streak"
               value={`${localUser.streak} minggu`}
-              tone="text-system-green"
+              tone="text-positive"
             />
             <StatCard
               label="Active Window"
               value={`${localUser.active_days_in_window ?? 0}/${dailyActivity.length || 35}`}
-              tone="text-system-blue"
+              tone="text-info"
             />
           </section>
 
           <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
             <div className="space-y-6">
-              {/* Streak Map — monthly view with day labels + weekly streak hero */}
-              <div className="glass rounded-3xl p-4 sm:p-6">
+              {/* Streak Map - monthly view with day labels + weekly streak hero */}
+              <div className="rounded-lg border border-border bg-panel shadow-xs p-4 sm:p-5">
                 <div className="flex items-start justify-between gap-4 mb-5">
                   <div>
-                    <h3 className="text-lg font-bold font-orbitron text-white flex items-center gap-2">
-                      <Flame className="text-system-red" size={18} />
+                    <h3 className="text-lg font-bold text-ink flex items-center gap-2">
+                      <Flame className="text-accent" size={18} />
                       Streak Map
                     </h3>
-                    <p className="text-xs text-gray-500 font-mono mt-1 leading-relaxed">
-                      <span className="text-system-green font-bold">
+                    <p className="text-xs text-ink-muted mt-1 leading-relaxed">
+                      <span className="text-positive font-semibold tabular-nums">
                         {localUser.streak} minggu
                       </span>{" "}
                       berturut-turut. Harimu mendukung streak mingguanmu.
                     </p>
                   </div>
                   <div className="text-right shrink-0">
-                    <div className="text-2xl font-black font-orbitron text-system-green">
+                    <div className="text-2xl font-bold text-positive tabular-nums">
                       {localUser.streak}w
                     </div>
-                    <div className="text-[10px] text-gray-500 font-mono uppercase">
+                    <div className="text-xs text-ink-muted">
                       Weekly Streak
                     </div>
-                    <div className="mt-1 text-[10px] text-gray-600 font-mono">
+                    <div className="mt-1 text-xs text-ink-muted tabular-nums">
                       Best: {localUser.longest_daily_streak ?? 0}d
                     </div>
                   </div>
@@ -500,8 +505,8 @@ export function PersonalPage({
                     return (
                       <div className="overflow-x-auto pb-2">
                         <div
-                          className="inline-flex items-start gap-1.5 p-3 rounded-2xl bg-gray-950/70 border border-gray-800/60"
-                          aria-label="Streak map — konsistensi mingguan"
+                          className="inline-flex items-start gap-1.5 p-3 rounded-lg bg-page-sunken border border-border"
+                          aria-label="Streak map - konsistensi mingguan"
                         >
                           {/* Day labels column */}
                           <div className="flex flex-col gap-[5px] pt-0 shrink-0">
@@ -510,7 +515,7 @@ export function PersonalPage({
                                 key={i}
                                 className="h-[22px] w-[24px] flex items-center justify-center"
                               >
-                                <span className="text-[10px] font-bold font-mono text-gray-500 uppercase">
+                                <span className="text-[10px] font-medium text-ink-muted">
                                   {label}
                                 </span>
                               </div>
@@ -539,23 +544,23 @@ export function PersonalPage({
                                             : "low";
                                     const cellClass =
                                       intensity === "high"
-                                        ? "bg-system-green border-system-green shadow-[0_0_8px_rgb(16,185,129,0.65)]"
+                                        ? "bg-positive border-positive"
                                         : intensity === "mid"
-                                          ? "bg-system-green/90 border-system-green/80 shadow-[0_0_4px_rgb(16,185,129,0.5)]"
+                                          ? "bg-positive/70 border-positive/60"
                                           : intensity === "low"
-                                            ? "bg-system-green border-system-green/70"
-                                            : "bg-[#111418] border-gray-800/70";
+                                            ? "bg-positive/40 border-positive/40"
+                                            : "bg-panel border-border";
                                     return (
                                       <span
                                         key={day.date}
-                                        className={`h-[22px] w-[22px] rounded-[5px] border transition-all hover:scale-110 hover:brightness-110 ${cellClass}`}
+                                        className={`h-[22px] w-[22px] rounded-[5px] border transition-transform hover:scale-110 hover:brightness-110 ${cellClass}`}
                                       />
                                     );
                                   })}
                                 </div>
                                 {/* Per-week active count */}
                                 <span
-                                  className={`text-[8px] font-mono leading-none ${activeDays > 0 ? "text-system-green/60" : "text-gray-700"}`}
+                                  className={`text-[8px] leading-none tabular-nums ${activeDays > 0 ? "text-positive" : "text-ink-muted"}`}
                                 >
                                   {activeDays}/7
                                 </span>
@@ -567,50 +572,50 @@ export function PersonalPage({
                     );
                   })()}
 
-                <div className="mt-5 flex flex-wrap items-center justify-between gap-4 text-[10px] text-gray-500 font-mono uppercase tracking-wider">
-                  <div className="text-gray-400">
-                    {dailyActivity[0] ? formatDate(dailyActivity[0].date) : "—"}{" "}
+                <div className="mt-5 flex flex-wrap items-center justify-between gap-4 text-xs font-medium text-ink-muted">
+                  <div className="text-ink-soft tabular-nums">
+                    {dailyActivity[0] ? formatDate(dailyActivity[0].date) : "-"}{" "}
                     →{" "}
                     {dailyActivity.at(-1)
                       ? formatDate(dailyActivity.at(-1)!.date)
-                      : "—"}
+                      : "-"}
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-1.5">
-                      <span className="h-3.5 w-3.5 rounded-[3px] bg-[#111418] border border-gray-800/70" />
+                      <span className="h-3.5 w-3.5 rounded-[3px] bg-page-sunken border border-border" />
                       <span>Rest</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className="h-3.5 w-3.5 rounded-[3px] bg-system-green border border-system-green/60" />
+                      <span className="h-3.5 w-3.5 rounded-[3px] bg-positive border border-positive/60" />
                       <span>Active</span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Weekly Goal — atur, lacak, raih */}
-              <section className={`glass rounded-3xl p-4 sm:p-6 ${glowClass}`}>
+              {/* Weekly Goal - atur, lacak, raih */}
+              <section className="rounded-lg border border-border bg-panel shadow-xs p-4 sm:p-5">
                 <div className="flex items-start justify-between gap-4 mb-5">
                   <div>
-                    <h3 className="text-lg font-bold font-orbitron text-white flex items-center gap-2">
-                      <Target className="text-system-gold" size={18} />
+                    <h3 className="text-lg font-bold text-ink flex items-center gap-2">
+                      <Target className="text-accent" size={18} />
                       Weekly Goal
                     </h3>
-                    <p className="text-xs text-gray-500 font-mono mt-1">
-                      Goal mingguan pribadi — atur target, lacak progress, raih
+                    <p className="text-xs text-ink-muted mt-1">
+                      Goal mingguan pribadi - atur target, lacak progress, raih
                       streak.
                     </p>
                   </div>
                   {activeGoal && (
                     <div className="text-right shrink-0">
                       <div
-                        className={`text-sm font-bold font-orbitron ${activeGoal.is_completed ? "text-system-gold" : "text-white"}`}
+                        className={`text-sm font-bold tabular-nums ${activeGoal.is_completed ? "text-gold" : "text-ink"}`}
                       >
                         {activeGoal.is_completed
                           ? "✅ Selesai"
                           : `${activeGoal.completed_days}/${activeGoal.target_days}`}
                       </div>
-                      <div className="text-[10px] text-gray-500 font-mono uppercase">
+                      <div className="text-xs text-ink-muted">
                         {activeGoal.is_completed ? "Goal Tercapai" : "Progress"}
                       </div>
                     </div>
@@ -618,12 +623,12 @@ export function PersonalPage({
                 </div>
 
                 {!activeGoal ? (
-                  <div className="rounded-2xl border border-gray-800/50 bg-gray-950/50 p-6 text-center">
-                    <Target className="mx-auto mb-3 text-gray-600" size={28} />
-                    <p className="text-sm text-gray-400 font-mono">
+                  <div className="rounded-lg border border-border bg-page-sunken p-6 text-center">
+                    <Target className="mx-auto mb-3 text-ink-muted" size={28} />
+                    <p className="text-sm text-ink-soft">
                       Belum ada goal aktif.
                     </p>
-                    <p className="text-xs text-gray-600 font-mono mt-1 mb-4 max-w-xs mx-auto">
+                    <p className="text-xs text-ink-muted mt-1 mb-4 max-w-xs mx-auto">
                       Tentukan target mingguanmu dan lacak konsistensimu setiap
                       hari.
                     </p>
@@ -633,7 +638,7 @@ export function PersonalPage({
                         setShowGoalForm(true);
                         setGoalError(null);
                       }}
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-system-gold text-gray-950 text-sm font-bold hover:bg-system-gold/90 transition-colors"
+                      className="inline-flex items-center gap-2 px-4 rounded-md bg-accent text-accent-fg text-sm font-semibold hover:bg-accent/90 transition-colors min-h-[44px]"
                     >
                       <Target size={14} />
                       Atur Goal
@@ -643,60 +648,60 @@ export function PersonalPage({
                   <div>
                     {/* Completed celebration banner */}
                     {activeGoal.is_completed && (
-                      <div className="mb-4 rounded-2xl border border-system-gold/40 bg-system-gold/10 p-4 text-center">
-                        <p className="text-lg font-bold font-orbitron text-system-gold">
-                          🎉 GOAL TERCAPAI! 🎉
+                      <div className="mb-4 rounded-lg border border-gold/30 bg-gold-soft p-4 text-center">
+                        <p className="text-base font-bold text-gold">
+                          🎉 Goal tercapai! 🎉
                         </p>
-                        <p className="text-sm text-gray-300 font-mono mt-1">
+                        <p className="text-sm text-ink-soft mt-1 tabular-nums">
                           {activeGoal.target_days}x {activeGoal.activity}{" "}
                           berhasil kamu selesaikan!
                         </p>
-                        <p className="text-xs text-gray-500 font-mono mt-2">
+                        <p className="text-xs text-ink-muted mt-2">
                           Konsisten itu kunci 💪 Sekarang kamu bisa set goal
                           baru dan lanjutkan streak mingguanmu!
                         </p>
                       </div>
                     )}
 
-                    {/* Progress bar (hidden when completed — replaced by banner) */}
+                    {/* Progress bar (hidden when completed - replaced by banner) */}
                     {!activeGoal.is_completed && (
-                      <div className="mb-4 rounded-2xl border border-gray-800 bg-gray-950/50 p-4">
+                      <div className="mb-4 rounded-lg border border-border bg-panel-raised p-4">
                         <div className="flex items-center justify-between gap-3 mb-2">
-                          <p className="text-sm text-white font-bold font-mono">
+                          <p className="text-sm text-ink font-semibold">
                             {activeGoal.target_days}x {activeGoal.activity}
                           </p>
-                          <p className="text-xs text-system-gold font-mono">
+                          <p className="text-xs text-accent font-semibold tabular-nums">
                             {activeGoal.percent}%
                           </p>
                         </div>
-                        <div className="h-3 rounded-full bg-gray-900 border border-gray-800 overflow-hidden p-[2px]">
+                        <div className="h-3 rounded-full bg-page-sunken overflow-hidden p-[2px]">
                           <div
-                            className="h-full rounded-full bg-gradient-to-r from-system-gold to-system-green"
+                            className="h-full rounded-full bg-accent"
                             style={{ width: `${activeGoal.percent}%` }}
                           />
                         </div>
-                        <p className="mt-2 text-[10px] text-gray-500 font-mono uppercase">
+                        <p className="mt-2 text-xs text-ink-muted">
                           Sisa {activeGoal.remaining_days} hari lagi untuk
                           mencapai goal.
                         </p>
                       </div>
                     )}
 
-                    {/* 7-day grid — hari dimulai dari tanggal start user */}
+                    {/* 7-day grid - hari dimulai dari tanggal start user */}
                     <div className="grid grid-cols-7 gap-1 sm:gap-2">
                       {activeGoal.days.map((day) => (
                         <div
                           key={day.date}
-                          className={`rounded-xl border p-1 sm:p-2 text-center ${
+                          className={`rounded-lg border p-1 sm:p-2 text-center ${
                             day.active
                               ? activeGoal.is_completed
-                                ? "border-system-gold/50 bg-system-gold/10"
-                                : "border-system-green/50 bg-system-green/10"
-                              : "border-gray-800 bg-gray-950/50"
+                                ? "border-gold/30 bg-gold-soft"
+                                : "border-positive/30 bg-positive-soft"
+                              : "border-border bg-page-sunken"
                           }`}
                           title={day.activity}
                         >
-                          <div className="text-[10px] text-gray-500 font-mono uppercase">
+                          <div className="text-xs text-ink-muted">
                             {day.day_label}
                           </div>
                           <div className="mt-1 flex justify-center">
@@ -705,12 +710,12 @@ export function PersonalPage({
                                 size={16}
                                 className={
                                   activeGoal.is_completed
-                                    ? "text-system-gold"
-                                    : "text-system-green"
+                                    ? "text-gold"
+                                    : "text-positive"
                                 }
                               />
                             ) : (
-                              <Circle size={16} className="text-gray-700" />
+                              <Circle size={16} className="text-ink-faint" />
                             )}
                           </div>
                         </div>
@@ -720,7 +725,7 @@ export function PersonalPage({
                 )}
 
                 {/* Goal setter controls */}
-                <div className="mt-4 pt-4 border-t border-gray-800/60">
+                <div className="mt-4 pt-4 border-t border-border">
                   <div className="flex items-center gap-2 mb-2 flex-wrap">
                     <button
                       onClick={() => {
@@ -733,7 +738,7 @@ export function PersonalPage({
                           );
                         }
                       }}
-                      className="text-xs px-3 py-1.5 rounded-xl border border-gray-700 text-gray-300 hover:text-white"
+                      className="text-xs px-3 py-1.5 rounded-md border border-border bg-panel text-ink-soft hover:bg-panel-raised hover:text-ink transition-colors"
                     >
                       {showGoalForm
                         ? "Tutup"
@@ -762,7 +767,7 @@ export function PersonalPage({
                               setResetLoading(false);
                             }
                           }}
-                          className="text-xs px-3 py-1.5 rounded-xl border border-system-red/30 text-system-red hover:bg-system-red/10"
+                          className="text-xs px-3 py-1.5 rounded-md border border-danger/40 text-danger hover:bg-danger-soft transition-colors"
                         >
                           {resetLoading ? "Reset..." : "Reset Goal"}
                         </button>
@@ -770,9 +775,9 @@ export function PersonalPage({
                   </div>
 
                   {showGoalForm && (
-                    <div className="rounded-2xl border border-gray-800 bg-gray-950/50 p-4 space-y-3">
+                    <div className="rounded-lg border border-border bg-page-sunken p-4 space-y-3">
                       <div>
-                        <label className="block text-[10px] text-gray-500 font-mono mb-1">
+                        <label className="block text-xs font-medium text-ink-muted mb-1">
                           Target Hari (1-7)
                         </label>
                         <select
@@ -780,7 +785,7 @@ export function PersonalPage({
                           onChange={(e) =>
                             setTargetDays(parseInt(e.target.value))
                           }
-                          className="w-full px-3 py-2 rounded-xl bg-gray-950 border border-gray-800 text-sm font-mono"
+                          className="w-full px-3 py-2 rounded-md bg-panel border border-border text-sm text-ink focus:border-border-strong"
                         >
                           {[1, 2, 3, 4, 5, 6, 7].map((d) => (
                             <option key={d} value={d}>
@@ -790,30 +795,30 @@ export function PersonalPage({
                         </select>
                       </div>
                       <div>
-                        <label className="block text-[10px] text-gray-500 font-mono mb-1">
+                        <label className="block text-xs font-medium text-ink-muted mb-1">
                           Aktivitas
                         </label>
                         <input
                           value={activity}
                           onChange={(e) => setActivity(e.target.value)}
-                          className="w-full px-3 py-2 rounded-xl bg-gray-950 border border-gray-800 text-sm font-mono"
+                          className="w-full px-3 py-2 rounded-md bg-panel border border-border text-sm text-ink focus:border-border-strong"
                           placeholder="Olahraga"
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-[10px] text-gray-500 font-mono mb-1">
+                          <label className="block text-xs font-medium text-ink-muted mb-1">
                             Mulai Tanggal
                           </label>
                           <input
                             type="date"
                             value={startDate}
                             onChange={(e) => setStartDate(e.target.value)}
-                            className="w-full px-3 py-2 rounded-xl bg-gray-950 border border-gray-800 text-sm font-mono"
+                            className="w-full px-3 py-2 rounded-md bg-panel border border-border text-sm text-ink focus:border-border-strong"
                           />
                         </div>
                         <div>
-                          <label className="block text-[10px] text-gray-500 font-mono mb-1">
+                          <label className="block text-xs font-medium text-ink-muted mb-1">
                             Jam Mulai
                           </label>
                           <select
@@ -821,7 +826,7 @@ export function PersonalPage({
                             onChange={(e) =>
                               setStartHour(parseInt(e.target.value))
                             }
-                            className="w-full px-3 py-2 rounded-xl bg-gray-950 border border-gray-800 text-sm font-mono"
+                            className="w-full px-3 py-2 rounded-md bg-panel border border-border text-sm text-ink focus:border-border-strong"
                           >
                             {Array.from({ length: 24 }, (_, i) => (
                               <option key={i} value={i}>
@@ -833,7 +838,7 @@ export function PersonalPage({
                       </div>
 
                       {goalError && (
-                        <p className="text-[10px] text-system-red">
+                        <p className="text-xs text-danger">
                           {goalError}
                         </p>
                       )}
@@ -876,14 +881,14 @@ export function PersonalPage({
                               showToast(
                                 res.message || "Goal berhasil diperbarui",
                               );
-                              // Sync with server in background — on success the
+                              // Sync with server in background - on success the
                               // server data (with real day statuses) replaces
                               // the optimistic goal. On failure we keep the
                               // optimistic state since the goal was saved.
                               try {
                                 await refreshUser();
                               } catch {
-                                // Goal saved, UI already showing it — silent
+                                // Goal saved, UI already showing it - silent
                                 // background sync failure is acceptable.
                               }
                             } catch (e) {
@@ -896,18 +901,18 @@ export function PersonalPage({
                               setGoalLoading(false);
                             }
                           }}
-                          className="flex-1 px-4 py-2 rounded-xl bg-system-gold text-gray-950 text-sm font-bold"
+                          className="flex-1 px-4 py-2 rounded-md bg-accent text-accent-fg text-sm font-semibold transition-colors hover:bg-accent/90"
                         >
                           {goalLoading ? "Menyimpan..." : "Simpan Goal"}
                         </button>
                         <button
                           onClick={() => setShowGoalForm(false)}
-                          className="px-4 py-2 rounded-xl border border-gray-700 text-xs"
+                          className="px-4 py-2 rounded-md border border-border text-xs text-ink-soft hover:bg-panel-raised hover:text-ink transition-colors"
                         >
                           Batal
                         </button>
                       </div>
-                      <p className="text-[10px] text-gray-500">
+                      <p className="text-xs text-ink-muted">
                         Goal berlaku 7 hari dari tanggal+jam yang dipilih.
                         Kosongkan tanggal untuk mulai hari ini.
                       </p>
@@ -917,37 +922,37 @@ export function PersonalPage({
               </section>
 
               {/* Side Quest Hari Ini (kept intact) */}
-              <section className={`glass rounded-3xl p-4 sm:p-6 ${glowClass}`}>
+              <section className="rounded-lg border border-border bg-panel shadow-xs p-4 sm:p-5">
                 <div className="flex items-start justify-between gap-4 mb-5">
                   <div>
-                    <h3 className="text-lg font-bold font-orbitron text-white flex items-center gap-2">
-                      <ScrollText className="text-system-green" size={18} />
+                    <h3 className="text-lg font-bold text-ink flex items-center gap-2">
+                      <ScrollText className="text-accent" size={18} />
                       Side Quest Hari Ini
                     </h3>
-                    <p className="text-xs text-gray-500 font-mono mt-1 leading-relaxed">
+                    <p className="text-xs text-ink-muted mt-1 leading-relaxed">
                       Selesaikan via WhatsApp:{" "}
-                      <span className="text-gray-300">
+                      <span className="font-mono text-ink-soft">
                         /lapor sidequest &lt;kegiatan&gt; &lt;jumlah&gt;
                       </span>
                       .
                     </p>
                   </div>
                   <div className="text-right shrink-0">
-                    <div className="text-sm font-bold font-orbitron text-white">
+                    <div className="text-sm font-bold text-ink tabular-nums">
                       {completedSideQuests}/{sideQuests.length}
                     </div>
-                    <div className="text-[10px] text-gray-500 font-mono uppercase">
+                    <div className="text-xs text-ink-muted">
                       Selesai
                     </div>
                   </div>
                 </div>
 
                 {sideQuests.length === 0 ? (
-                  <div className="rounded-2xl border border-gray-800/50 bg-gray-950/50 p-4 text-center">
-                    <p className="text-sm text-gray-400 font-mono">
+                  <div className="rounded-lg border border-border bg-page-sunken p-4 text-center">
+                    <p className="text-sm text-ink-soft">
                       Side quest belum terbuka.
                     </p>
-                    <p className="text-xs text-gray-600 font-mono mt-1">
+                    <p className="text-xs text-ink-muted mt-1 tabular-nums">
                       Side quest tersedia untuk profil yang sudah punya job.
                     </p>
                   </div>
@@ -958,33 +963,33 @@ export function PersonalPage({
                       return (
                         <div
                           key={quest.id}
-                          className="rounded-2xl border border-gray-800/50 bg-gray-950/50 p-4"
+                          className="rounded-lg border border-border bg-page-sunken p-4"
                         >
                           <div className="flex items-start gap-3">
                             {done ? (
                               <CheckCircle2
-                                className="text-system-green shrink-0 mt-0.5"
+                                className="text-positive shrink-0 mt-0.5"
                                 size={18}
                               />
                             ) : (
                               <Circle
-                                className="text-gray-600 shrink-0 mt-0.5"
+                                className="text-ink-faint shrink-0 mt-0.5"
                                 size={18}
                               />
                             )}
                             <div className="flex-1 min-w-0">
                               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                                <p className="text-sm font-bold text-white font-mono">
+                                <p className="text-sm font-semibold text-ink">
                                   {quest.name}
                                 </p>
-                                <span className="text-[10px] text-gray-400 font-mono uppercase tracking-wider">
+                                <span className="text-xs text-ink-muted">
                                   {formatQuestDifficulty(quest.difficulty)}
                                 </span>
                               </div>
-                              <p className="text-xs text-gray-500 font-mono mt-1">
+                              <p className="text-xs text-ink-muted mt-1">
                                 Target: {formatQuestTarget(quest)}
                               </p>
-                              <p className="text-xs text-gray-600 font-mono mt-1">
+                              <p className="text-xs text-ink-muted mt-1 tabular-nums">
                                 Progress: {formatQuestProgress(quest)}
                               </p>
                             </div>
@@ -997,19 +1002,19 @@ export function PersonalPage({
               </section>
             </div>
 
-            {/* Right aside — attributes and achievements post incoming */}
+            {/* Right aside - attributes and achievements post incoming */}
             <aside className="space-y-6">
               <StravaConnectPanel onMessage={showToast} />
 
-              {/* Job Profile — same layout as public leaderboard click (ProfileModal) */}
-              <section className={`glass rounded-3xl p-4 sm:p-6 ${glowClass}`}>
-                <h3 className="text-xs text-system-gold font-mono font-bold uppercase tracking-widest mb-3">
+              {/* Job Profile - same layout as public leaderboard click (ProfileModal) */}
+              <section className="rounded-lg border border-border bg-panel shadow-xs p-4 sm:p-5">
+                <h3 className="text-xs font-medium text-ink-muted mb-3">
                   Job Profile
                 </h3>
                 <div className="flex flex-col sm:flex-row items-center gap-3 mb-3">
                   <span className="text-2xl">{localUser.job_icon}</span>
                   <span
-                    className={`text-xs px-2.5 py-1 rounded-full border font-mono ${getJobColor(localUser.job_class)}`}
+                    className={`text-xs px-2.5 py-1 rounded-full border border-border ${jobTone(localUser.job_class)}`}
                   >
                     {localUser.job_name}
                   </span>
@@ -1033,25 +1038,25 @@ export function PersonalPage({
                         }
                       }
                     }}
-                    className="ml-auto text-xs px-2 py-1 rounded-lg border border-gray-700 text-gray-400 hover:text-white"
+                    className="ml-auto text-xs px-2 py-1 rounded-md border border-border text-ink-soft hover:bg-panel-raised hover:text-ink transition-colors"
                   >
                     Ganti
                   </button>
                 </div>
-                <p className="text-sm text-gray-300 leading-relaxed">
+                <p className="text-sm text-ink-soft leading-relaxed">
                   {localUser.job_description}
                 </p>
                 {localUser.job_trait && (
-                  <div className="mt-3 p-2.5 rounded-lg bg-gray-950/50 border border-gray-800 text-xs text-gray-400 font-mono">
-                    <span className="text-system-gold font-bold">Trait:</span>{" "}
+                  <div className="mt-3 p-2.5 rounded-lg bg-page-sunken border border-border text-xs text-ink-soft">
+                    <span className="text-accent font-semibold">Trait:</span>{" "}
                     {localUser.job_trait}
                   </div>
                 )}
               </section>
 
-              <section className={`glass rounded-3xl p-4 sm:p-6 ${glowClass}`}>
-                <h3 className="text-lg font-bold font-orbitron text-white flex items-center gap-2 mb-4">
-                  <Activity className="text-system-blue" size={18} />
+              <section className="rounded-lg border border-border bg-panel shadow-xs p-4 sm:p-5">
+                <h3 className="text-lg font-bold text-ink flex items-center gap-2 mb-4">
+                  <Activity className="text-accent" size={18} />
                   Attributes
                 </h3>
                 <div className="space-y-4">
@@ -1061,48 +1066,36 @@ export function PersonalPage({
                       label: "STR",
                       hint: "Strength / Gym",
                       value: clampAttribute(localUser.str),
-                      color: "text-system-red",
-                      bar: "bg-gradient-to-r from-system-red to-amber-500",
                     },
                     {
                       icon: Zap,
                       label: "STA",
                       hint: "Stamina / Cardio",
                       value: clampAttribute(localUser.sta),
-                      color: "text-system-blue",
-                      bar: "bg-gradient-to-r from-amber-500 to-system-gold",
                     },
                     {
                       icon: Shield,
                       label: "AGI",
                       hint: "Agility / Sport",
                       value: clampAttribute(localUser.agi),
-                      color: "text-system-purple",
-                      bar: "bg-gradient-to-r from-system-blue to-system-green",
                     },
                     {
                       icon: Heart,
                       label: "VIT",
                       hint: "Vitality / Recovery",
                       value: clampAttribute(localUser.vit),
-                      color: "text-system-green",
-                      bar: "bg-gradient-to-r from-system-green to-system-blue",
                     },
                     {
                       icon: Mountain,
                       label: "END",
                       hint: "Endurance / Hiking",
                       value: clampAttribute(localUser.end),
-                      color: "text-system-gold",
-                      bar: "bg-gradient-to-r from-system-gold to-amber-500",
                     },
                     {
                       icon: Moon,
                       label: "LUK",
                       hint: "Luck / Resilience",
                       value: clampAttribute(localUser.luk),
-                      color: "text-gray-400",
-                      bar: "bg-gradient-to-r from-gray-500 to-gray-700",
                     },
                   ].map((stat) => {
                     const Icon = stat.icon;
@@ -1111,23 +1104,23 @@ export function PersonalPage({
                       <div key={stat.label}>
                         <div className="flex items-center justify-between gap-3 mb-1.5">
                           <div
-                            className={`flex items-center gap-2 ${stat.color}`}
+                            className="flex items-center gap-2"
                           >
                             <Icon size={16} />
-                            <span className="text-xs font-bold font-mono">
+                            <span className="text-xs font-semibold text-ink">
                               {stat.label}
                             </span>
-                            <span className="text-[10px] text-gray-500 font-mono">
+                            <span className="text-[10px] text-ink-muted">
                               {stat.hint}
                             </span>
                           </div>
-                          <span className="text-sm font-bold font-orbitron text-white">
+                          <span className="text-sm font-bold text-ink tabular-nums">
                             {stat.value}
                           </span>
                         </div>
-                        <div className="h-2 rounded-full bg-gray-950 border border-gray-800 overflow-hidden">
+                        <div className="h-2 rounded-full bg-page-sunken overflow-hidden">
                           <div
-                            className={`h-full rounded-full ${stat.bar} transition-all duration-500`}
+                            className="h-full rounded-full bg-accent transition-all duration-500"
                             style={{ width: `${width}%` }}
                           />
                         </div>
@@ -1137,34 +1130,34 @@ export function PersonalPage({
                 </div>
               </section>
 
-              <section className={`glass rounded-3xl p-4 sm:p-6 ${glowClass}`}>
-                <h3 className="text-lg font-bold font-orbitron text-white flex items-center gap-2 mb-4">
-                  <TrendingUp className="text-system-gold" size={18} />
+              <section className="rounded-lg border border-border bg-panel shadow-xs p-4 sm:p-5">
+                <h3 className="text-lg font-bold text-ink flex items-center gap-2 mb-4">
+                  <TrendingUp className="text-accent" size={18} />
                   Rank Baseline
                 </h3>
-                <div className="rounded-2xl border border-gray-800 bg-gray-950/50 p-4 mb-4">
+                <div className="rounded-lg border border-border bg-panel-raised p-4 mb-4">
                   <div className="flex items-center justify-between gap-3 mb-2">
                     <div>
-                      <p className="text-[10px] text-gray-500 font-mono uppercase">
+                      <p className="text-xs text-ink-muted">
                         Season Rank
                       </p>
-                      <p className="text-lg font-bold font-orbitron text-white">
+                      <p className="text-lg font-bold text-ink">
                         {localUser.rank_icon} {localUser.rank_name}
                       </p>
                     </div>
-                    <p className="text-sm font-bold font-orbitron text-system-gold">
+                    <p className="text-sm font-bold text-ink tabular-nums">
                       {localUser.seasonal_points} pts
                     </p>
                   </div>
-                  <div className="h-3 rounded-full bg-gray-900 border border-gray-800 overflow-hidden p-[2px]">
+                  <div className="h-3 rounded-full bg-page-sunken overflow-hidden p-[2px]">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-system-purple to-system-gold"
+                      className="h-full rounded-full bg-accent"
                       style={{
                         width: `${localUser.season_rank_progress.percent}%`,
                       }}
                     />
                   </div>
-                  <p className="mt-2 text-[10px] text-gray-500 font-mono uppercase">
+                  <p className="mt-2 text-xs text-ink-muted">
                     {localUser.season_rank_progress.is_max
                       ? "Max rank season ini"
                       : `Menuju ${localUser.season_rank_progress.next_icon} ${localUser.season_rank_progress.next_name}: ${localUser.season_rank_progress.remaining} pts lagi`}
@@ -1174,33 +1167,32 @@ export function PersonalPage({
                   <StatCard
                     label="Goals Done"
                     value={localUser.goals_completed}
-                    tone="text-system-gold"
+                    tone="text-gold"
                   />
                   <StatCard
                     label="Side Quests"
                     value={localUser.seasonal_side_quests}
-                    tone="text-system-green"
+                    tone="text-positive"
                   />
                   <StatCard
                     label="Season Days"
                     value={localUser.seasonal_activity_count}
-                    tone="text-system-blue"
+                    tone="text-info"
                   />
                   <StatCard
                     label="Total Days"
                     value={localUser.total_active_days}
-                    tone="text-white"
                   />
                 </div>
               </section>
 
-              <section className={`glass rounded-3xl p-4 sm:p-6 ${glowClass}`}>
-                <h3 className="text-lg font-bold font-orbitron text-white flex items-center gap-2 mb-4">
-                  <Award className="text-system-gold" size={18} />
+              <section className="rounded-lg border border-border bg-panel shadow-xs p-4 sm:p-5">
+                <h3 className="text-lg font-bold text-ink flex items-center gap-2 mb-4">
+                  <Award className="text-accent" size={18} />
                   Achievements
                 </h3>
                 {allBadges.length === 0 ? (
-                  <p className="text-xs text-gray-600 font-mono italic">
+                  <p className="text-xs text-ink-muted">
                     Belum ada badge. Fokus ke streak, goal, dan side quest dulu.
                   </p>
                 ) : (
@@ -1208,7 +1200,7 @@ export function PersonalPage({
                     {localUser.achievements.map((badge) => (
                       <span
                         key={`life-${badge}`}
-                        className="inline-flex items-center gap-1 rounded-lg border border-system-gold/30 bg-system-gold/10 px-2.5 py-1 text-[10px] font-bold font-mono text-system-gold"
+                        className="inline-flex items-center gap-1 rounded-full border border-border bg-gold-soft px-2.5 py-1 text-xs font-medium text-gold"
                       >
                         <Award size={11} /> {badge}
                       </span>
@@ -1216,7 +1208,7 @@ export function PersonalPage({
                     {localUser.seasonal_achievements.map((badge) => (
                       <span
                         key={`season-${badge}`}
-                        className="inline-flex items-center gap-1 rounded-lg border border-system-purple/30 bg-system-purple/10 px-2.5 py-1 text-[10px] font-bold font-mono text-system-purple"
+                        className="inline-flex items-center gap-1 rounded-full border border-border bg-info-soft px-2.5 py-1 text-xs font-medium text-info"
                       >
                         <Award size={11} /> {badge}
                       </span>

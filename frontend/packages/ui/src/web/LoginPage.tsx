@@ -50,21 +50,22 @@ export function LoginPage({ onLoginSuccess, onBack }: LoginPageProps) {
 
   return (
     <div className="min-h-[70vh] flex items-center justify-center px-4">
-      <div className="w-full max-w-md glass glass-glow-volt rounded-3xl p-8 border border-system-volt/25 animate-scale-in">
-        <div className="flex items-center gap-3 mb-6">
+      <div className="w-full max-w-md rounded-xl border border-border bg-panel p-6 shadow-md sm:p-8 animate-scale-in">
+        <div className="flex items-start gap-3 mb-6">
           <button
             onClick={onBack}
-            className="p-2 rounded-xl bg-gray-950 hover:bg-gray-900 border border-gray-800 text-gray-400 hover:text-white transition-colors"
+            className="h-10 w-10 shrink-0 inline-flex items-center justify-center rounded-md border border-border bg-panel text-ink-soft hover:bg-panel-raised hover:text-ink transition-colors"
             title="Kembali"
+            aria-label="Kembali"
           >
             <ArrowLeft size={16} />
           </button>
           <div>
-            <h2 className="text-lg font-bold font-orbitron text-white tracking-wide flex items-center gap-2">
-              <User className="text-system-blue" size={18} />
+            <h2 className="text-lg font-semibold text-ink flex items-center gap-2">
+              <User className="text-accent" size={18} />
               Akses Personal
             </h2>
-            <p className="text-xs text-gray-500 font-mono mt-0.5 uppercase tracking-wider">
+            <p className="mt-0.5 text-xs text-ink-muted">
               Masuk dengan nomor HP yang sudah pernah lapor
             </p>
           </div>
@@ -72,12 +73,15 @@ export function LoginPage({ onLoginSuccess, onBack }: LoginPageProps) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs text-gray-400 font-mono uppercase tracking-wider mb-1.5">
+            <label
+              htmlFor="login-phone"
+              className="block text-xs font-medium text-ink-soft mb-1.5"
+            >
               Nomor Telepon
             </label>
             <div className="flex gap-2">
               <div className="relative shrink-0">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-ink-muted pointer-events-none">
                   +
                 </span>
                 <input
@@ -88,22 +92,24 @@ export function LoginPage({ onLoginSuccess, onBack }: LoginPageProps) {
                   }
                   placeholder="62"
                   maxLength={3}
-                  className="w-16 pl-6 pr-2 py-2.5 rounded-xl bg-gray-950 border border-gray-800 text-white text-sm font-mono focus:outline-none focus:border-system-blue transition-colors"
+                  aria-label="Kode negara"
+                  className="w-16 min-h-[44px] pl-6 pr-2 rounded-md bg-panel border border-border text-sm text-ink tabular-nums placeholder:text-ink-faint focus:border-border-strong transition-colors"
                   disabled={loading}
                 />
               </div>
               <div className="relative flex-1">
                 <Phone
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted"
                   size={14}
                 />
                 <input
+                  id="login-phone"
                   type="text"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
                   placeholder="8xxxxxx"
                   maxLength={14}
-                  className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-gray-950 border border-gray-800 text-white text-sm font-mono focus:outline-none focus:border-system-blue transition-colors"
+                  className="w-full min-h-[44px] pl-9 pr-3 rounded-md bg-panel border border-border text-sm text-ink placeholder:text-ink-faint focus:border-border-strong transition-colors"
                   disabled={loading}
                   autoFocus
                 />
@@ -112,31 +118,31 @@ export function LoginPage({ onLoginSuccess, onBack }: LoginPageProps) {
           </div>
 
           {error && (
-            <div className="p-3 rounded-xl bg-system-red/10 border border-system-red/35 flex items-start gap-2">
+            <div className="p-3 rounded-md bg-danger-soft border border-danger/25 flex items-start gap-2">
               <AlertCircle
-                className="text-system-red mt-0.5 shrink-0"
+                className="text-danger mt-0.5 shrink-0"
                 size={14}
               />
-              <p className="text-xs text-red-300 font-mono">{error}</p>
+              <p className="text-sm text-danger">{error}</p>
             </div>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="btn-press w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-system-green to-system-volt border border-system-volt/40 text-gray-950 font-bold font-orbitron text-sm tracking-wider uppercase shadow-neon-volt hover:brightness-110 transition-all disabled:opacity-50"
+            className="w-full min-h-[44px] flex items-center justify-center gap-2 px-5 rounded-md bg-accent text-accent-fg text-sm font-semibold hover:bg-accent/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <Loader2 className="animate-spin" size={16} />
             ) : (
               <LogIn size={16} />
             )}
-            {loading ? "Mencari..." : "Masuk"}
+            {loading ? "Memeriksa nomor..." : "Masuk"}
           </button>
         </form>
 
-        <p className="text-[10px] text-gray-600 font-mono mt-5 text-center tracking-wide uppercase">
-          Pastikan nomor HP kamu terdaftar di database laporan grup
+        <p className="text-xs text-ink-muted mt-5 text-center">
+          Nomor HP harus sudah pernah lapor di grup sebelumnya.
         </p>
       </div>
     </div>

@@ -118,14 +118,14 @@ export function QuickReport({
   };
 
   return (
-    <section className="glass rounded-3xl p-4 sm:p-6 glass-glow-green mb-6">
+    <section className="rounded-lg border border-border bg-panel shadow-xs p-4 sm:p-5 mb-6">
       <div className="flex items-center justify-between gap-3 mb-4">
         <div>
-          <h3 className="text-lg font-bold font-orbitron text-white flex items-center gap-2">
-            <Sparkles className="text-system-gold" size={18} />
+          <h3 className="text-lg font-bold text-ink flex items-center gap-2">
+            <Sparkles className="text-accent" size={18} />
             Lapor Hari Ini
           </h3>
-          <p className="text-xs text-gray-500 font-mono mt-1">
+          <p className="text-xs text-ink-muted mt-1 tabular-nums">
             {capped
               ? `Kuota harian penuh (${dailyCount}/${maxDaily})`
               : `Laporan ke-${dailyCount + 1} hari ini (max ${maxDaily}x)`}
@@ -133,8 +133,8 @@ export function QuickReport({
         </div>
         {dailyCount > 0 && (
           <span
-            className={`text-sm font-bold font-orbitron ${
-              capped ? "text-system-red" : "text-system-green"
+            className={`text-sm font-bold tabular-nums ${
+              capped ? "text-danger" : "text-positive"
             }`}
           >
             {dailyCount}/{maxDaily}
@@ -157,13 +157,13 @@ export function QuickReport({
                   : "Apa aktivitasmu hari ini?"
               }
               disabled={capped || submitting}
-              className="w-full px-4 py-3 rounded-2xl bg-gray-950 border border-gray-800 text-white text-base sm:text-sm font-mono placeholder:text-gray-600 focus:outline-none focus:border-system-green/50 focus:ring-1 focus:ring-system-green/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full px-4 py-3 rounded-md bg-page-sunken border border-border text-ink text-base sm:text-sm placeholder:text-ink-muted focus:border-border-strong transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
           <button
             type="submit"
             disabled={capped || submitting}
-            className="shrink-0 flex items-center gap-2 px-5 py-3 rounded-2xl bg-system-green hover:bg-system-green/90 text-gray-950 font-bold font-orbitron text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed min-h-[44px]"
+            className="shrink-0 flex items-center gap-2 px-5 rounded-md bg-accent hover:bg-accent/90 text-accent-fg font-semibold text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed min-h-[44px]"
           >
             {submitting ? (
               <Loader2 className="animate-spin" size={16} />
@@ -186,7 +186,7 @@ export function QuickReport({
                 type="button"
                 disabled={submitting}
                 onClick={() => handleChipClick(chip.message)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-950/70 border border-gray-800 text-xs font-mono text-gray-300 hover:text-white hover:border-gray-600 transition-colors disabled:opacity-50 min-h-[36px]"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-border bg-panel hover:bg-panel-raised text-xs font-medium text-ink-soft hover:text-ink transition-colors disabled:opacity-50 min-h-[36px]"
               >
                 <Icon size={12} />
                 {chip.label}
@@ -206,7 +206,7 @@ export function QuickReport({
               setTimeout(() => sidequestRef.current?.focus(), 100);
             }
           }}
-          className="flex items-center gap-2 text-xs font-mono text-gray-400 hover:text-system-green transition-colors min-h-[32px]"
+          className="flex items-center gap-2 text-xs font-medium text-ink-muted hover:text-ink transition-colors min-h-[32px]"
         >
           <ScrollText size={14} />
           Lapor Sidequest
@@ -217,8 +217,8 @@ export function QuickReport({
         </button>
 
         {showSidequest && (
-          <div className="mt-3 p-4 rounded-2xl bg-gray-950/50 border border-gray-800">
-            <p className="text-[10px] text-gray-500 font-mono mb-3">
+          <div className="mt-3 p-4 rounded-lg bg-page-sunken border border-border">
+            <p className="text-xs text-ink-muted mb-3">
               Format: &lt;kegiatan&gt; &lt;jumlah&gt;. Contoh: pushup 15, lari
               10 km, plank 30 detik
             </p>
@@ -230,7 +230,7 @@ export function QuickReport({
                   type="button"
                   disabled={submitting}
                   onClick={() => setSidequestInput(sq.value)}
-                  className="px-2.5 py-1 rounded-lg bg-gray-900 border border-gray-800 text-[10px] font-mono text-gray-400 hover:text-white hover:border-gray-600 transition-colors disabled:opacity-50"
+                  className="px-2.5 py-1 rounded-md border border-border bg-panel text-xs text-ink-muted hover:text-ink hover:bg-panel-raised transition-colors disabled:opacity-50"
                 >
                   {sq.label}
                 </button>
@@ -245,12 +245,12 @@ export function QuickReport({
                 onChange={(e) => setSidequestInput(e.target.value)}
                 placeholder="pushup 15"
                 disabled={submitting}
-                className="flex-1 min-w-0 px-3 py-2 rounded-xl bg-gray-950 border border-gray-800 text-base sm:text-sm font-mono text-white placeholder:text-gray-600 focus:outline-none focus:border-system-green/50 transition-all disabled:opacity-50"
+                className="flex-1 min-w-0 px-3 py-2 rounded-md border border-border bg-panel text-base sm:text-sm text-ink placeholder:text-ink-muted focus:border-border-strong transition-colors disabled:opacity-50"
               />
               <button
                 type="submit"
                 disabled={submitting || !sidequestInput.trim()}
-                className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-system-green/15 hover:bg-system-green/25 border border-system-green/30 text-system-green font-mono text-xs transition-colors disabled:opacity-40 disabled:cursor-not-allowed min-h-[40px]"
+                className="shrink-0 flex items-center gap-1.5 px-4 rounded-md bg-accent-soft text-accent font-semibold text-xs transition-colors disabled:opacity-40 disabled:cursor-not-allowed min-h-[40px]"
               >
                 {submitting ? (
                   <Loader2 className="animate-spin" size={12} />
@@ -267,10 +267,10 @@ export function QuickReport({
       {/* Feedback toast */}
       {feedback && (
         <div
-          className={`mt-3 p-3 rounded-xl border text-xs font-mono ${
+          className={`mt-3 p-3 rounded-md border text-xs ${
             feedback.tone === "success"
-              ? "border-system-green/30 bg-system-green/10 text-system-green"
-              : "border-system-red/30 bg-system-red/10 text-system-red"
+              ? "border-positive/30 bg-positive-soft text-positive"
+              : "border-danger/30 bg-danger-soft text-danger"
           }`}
         >
           {feedback.text}

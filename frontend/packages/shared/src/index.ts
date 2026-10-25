@@ -5,7 +5,6 @@ export * from "./providers/AuthProvider";
 export * from "./hooks/useReports";
 export * from "./hooks/useAuth";
 
-export { getJobColor, getJobBadgeClass } from "./job-utils";
 export { ATTRIBUTE_MIN, clampAttribute, attributeBarWidth } from "./attributes";
 export {
   LEADERBOARD_SORT_KEYS,

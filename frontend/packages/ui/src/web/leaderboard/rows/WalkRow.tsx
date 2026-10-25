@@ -22,7 +22,6 @@ export const WalkRow: React.FC<WalkRowProps> = ({
   onSelectHunter,
 }) => (
   <tr
-    key={hunter.user_id}
     tabIndex={0}
     role="button"
     onClick={() => onSelectHunter(hunter)}
@@ -34,24 +33,30 @@ export const WalkRow: React.FC<WalkRowProps> = ({
     }}
     className={rowClass}
   >
-    <td className="py-4 pl-4 text-center font-mono align-middle">
+    <td className="py-3 px-4 align-middle">
       <div className="flex justify-center">
         <RankBadge rank={rank} />
       </div>
     </td>
     <HunterCell hunter={hunter} />
     <JobCell hunter={hunter} />
-    <td className="py-4 pl-4 text-center font-mono text-sm text-gray-300 align-middle">
-      {formatStepsID(hunter.week_walk_steps ?? 0)}
-      <span className="text-[10px] text-gray-500"> langkah</span>
+    <td className="py-3 px-4 align-middle text-right tabular-nums">
+      <span className="text-sm font-semibold text-ink">
+        {formatStepsID(hunter.week_walk_steps ?? 0)}
+      </span>
+      <span className="text-xs text-ink-muted"> langkah</span>
     </td>
-    <td className="py-4 pl-4 text-center font-mono text-sm text-gray-300 align-middle">
-      {formatStepsID(hunter.seasonal_walk_steps ?? 0)}
-      <span className="text-[10px] text-gray-500"> langkah</span>
+    <td className="py-3 px-4 align-middle text-right tabular-nums">
+      <span className="text-sm text-ink-soft">
+        {formatStepsID(hunter.seasonal_walk_steps ?? 0)}
+      </span>
+      <span className="text-xs text-ink-muted"> langkah</span>
     </td>
-    <td className="py-4 pl-4 text-right pr-4 font-mono font-bold text-system-gold align-middle">
-      {formatStepsID(hunter.walk_steps_total ?? 0)}
-      <span className="text-[10px] text-gray-500"> langkah</span>
+    <td className="py-3 pl-4 pr-4 align-middle text-right tabular-nums">
+      <span className="text-sm font-semibold text-ink">
+        {formatStepsID(hunter.walk_steps_total ?? 0)}
+      </span>
+      <span className="text-xs text-ink-muted"> langkah</span>
     </td>
   </tr>
 );

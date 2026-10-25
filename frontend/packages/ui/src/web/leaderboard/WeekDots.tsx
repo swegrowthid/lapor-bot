@@ -13,10 +13,8 @@ export const WeekDots: React.FC<WeekDotsProps> = ({ hunter }) => (
     {hunter.week_activity.map((active, idx) => (
       <span
         key={`${hunter.user_id}-week-${idx}`}
-        className={`h-3 w-3 rounded-sm border ${
-          active
-            ? "bg-system-green border-system-green/60 shadow-neon-purple"
-            : "bg-gray-900 border-gray-800"
+        className={`h-3 w-3 rounded-full border ${
+          active ? "bg-positive border-positive" : "bg-page-sunken border-border"
         }`}
         title={active ? "Aktif" : "Belum aktif"}
       />

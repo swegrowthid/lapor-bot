@@ -101,8 +101,24 @@ func GetNextResetTime(now time.Time) time.Time {
 	return time.Date(year+1, SessionResetMonths[0], 1, 0, 0, 0, 0, loc)
 }
 
+// seasonResetMarker returns the idempotency marker name for a given season.
+func seasonResetMarker(sessionNumber int) string {
+	return fmt.Sprintf("session_reset_v1_%d", sessionNumber)
+}
+
 // Execute resets seasonal report data and sends an announcement to the group.
+// It is idempotent per season: the reset and announcement only run once, so
+// duplicate triggers (e.g. startup missed-reset check racing the scheduled
+// timer, or multiple bot instances / docker restarts) won't send the
+// announcement twice. The announcement tags @all group members.
 func (uc *ResetSessionUsecase) Execute(ctx context.Context, client *whatsmeow.Client, groupID string, sessionNumber int) error {
+	marker := seasonResetMarker(sessionNumber)
+	done, err := uc.repo.HasMigration(ctx, marker)
+	if err == nil && done {
+		log.Printf("[SESSION RESET] Season %d already reset; skipping duplicate.", sessionNumber)
+		return nil
+	}
+
 	log.Printf("[SESSION RESET] Starting Season %d reset — clearing seasonal data...", sessionNumber)
 
 	// Reset all reports in the database
@@ -112,58 +128,138 @@ func (uc *ResetSessionUsecase) Execute(ctx context.Context, client *whatsmeow.Cl
 
 	log.Printf("[SESSION RESET] Seasonal data has been reset for Season %d!", sessionNumber)
 
-	// Send announcement to the group
-	if groupID != "" && client != nil && client.IsConnected() {
-		announcement := buildSeasonResetAnnouncement(sessionNumber)
+	// Send announcement to the group, tagging all members.
+	// WhatsApp silently drops ExtendedTextMessage with >256 MentionedJID
+	// entries, so we batch into chunks of 200.
+	const maxMentionsPerMessage = 200
 
-		targetJID, _ := types.ParseJID(groupID)
-		msg := &waE2E.Message{
-			Conversation: &announcement,
-		}
-		_, err := client.SendMessage(ctx, targetJID, msg)
+	if groupID != "" && client != nil && client.IsConnected() {
+		targetJID, err := types.ParseJID(groupID)
 		if err != nil {
-			log.Printf("[SESSION RESET] Failed to send announcement: %v", err)
-			return fmt.Errorf("reset succeeded but failed to send announcement: %w", err)
+			log.Printf("[SESSION RESET] Invalid GroupID %q: %v", groupID, err)
+		} else {
+			var mentions []string
+			if info, err := client.GetGroupInfo(ctx, targetJID); err == nil {
+				for _, p := range info.Participants {
+					if p.JID.IsEmpty() {
+						continue
+					}
+					mentions = append(mentions, p.JID.ToNonAD().String())
+				}
+			} else {
+				log.Printf("[SESSION RESET] Failed to fetch group info for mentions: %v", err)
+			}
+
+			announcement := buildSeasonResetAnnouncement(sessionNumber)
+			for i := 0; i < len(mentions); i += maxMentionsPerMessage {
+				end := i + maxMentionsPerMessage
+				if end > len(mentions) {
+					end = len(mentions)
+				}
+				batch := mentions[i:end]
+				msg := &waE2E.Message{
+					ExtendedTextMessage: &waE2E.ExtendedTextMessage{
+						Text: &announcement,
+						ContextInfo: &waE2E.ContextInfo{
+							MentionedJID: batch,
+						},
+					},
+				}
+				_, err := client.SendMessage(ctx, targetJID, msg)
+				if err != nil {
+					log.Printf("[SESSION RESET] Failed to send announcement batch %d/%d: %v", i/maxMentionsPerMessage+1, (len(mentions)+maxMentionsPerMessage-1)/maxMentionsPerMessage, err)
+					return fmt.Errorf("reset succeeded but failed to send announcement: %w", err)
+				}
+			}
+			log.Printf("[SESSION RESET] Season %d announcement sent to group with %d mention(s) in %d batch(es)!", sessionNumber, len(mentions), (len(mentions)+maxMentionsPerMessage-1)/maxMentionsPerMessage)
 		}
-		log.Printf("[SESSION RESET] Season %d announcement sent to group!", sessionNumber)
+	}
+
+	// Record that this season's reset was performed so it can't run twice.
+	if err := uc.repo.SaveMigration(ctx, marker); err != nil {
+		log.Printf("[SESSION RESET] Failed to save reset marker: %v", err)
 	}
 
 	return nil
 }
 
 func buildSeasonResetAnnouncement(sessionNumber int) string {
-	seasonTransition := "Season perdana telah resmi dimulai. Semua hunter mulai berburu dari titik yang sama! 🎉"
 	if sessionNumber > 1 {
-		seasonTransition = fmt.Sprintf("Season %d telah resmi berakhir! 🎉", sessionNumber-1)
+		return fmt.Sprintf(`🚨✨ *SEASON %d RESMI DIMULAI!* ✨🚨
+
+🏆 *SEASON %d — START FROM ZERO!* 🏆
+
+Halo semua Hunters! 👋🔥
+
+Season %d kemarin adalah *masa TRIAL & ERROR* — sistem poin dan aturannya masih uji coba. Jadi untuk keadilan bersama, *semua data di-WIPE TOTAL!* 🧹💥
+
+📋 *Yang di-reset penuh:*
+• 💰 Points, EXP & Level → *0*
+• 🔥 Streak & Max Streak → *0*
+• 🏅 Achievements & Badges → *0*
+• 📅 Seasonal Activity & Goals → *0*
+• 🎭 Stats (STR/STA/AGI/VIT/END/LUK) → *baseline*
+• 🏆 Rank & Leaderboard → *kosong, semua SETARA!*
+
+🎯 *Semua peserta kembali ke titik nol yang sama!* Tidak ada yang diuntungkan, tidak ada yang dirugikan — adil untuk semua! 💪
+
+📌 *Langkah pertama di Season %d:*
+👉 Kirim */lapor* sekarang untuk laporan pertamamu dan mulai membangun skor dari awal!
+
+🌐 Lihat klasemen & stats: https://lapor-bot.web.id/
+
+*Siap berburu di Season %d? SEMANGAT!* 🚀🔥`, sessionNumber, sessionNumber, sessionNumber-1, sessionNumber, sessionNumber)
 	}
 
-	return fmt.Sprintf(`🔄 *SEASON %d TELAH DIMULAI!* 🔄
+	return fmt.Sprintf(`🎉 *SEASON %d TELAH DIMULAI!* 🎉
 
 Halo para pejuang keringat! 🏋️‍♂️
 
-%s
+Season perdana telah resmi dimulai. Semua hunter mulai berburu dari titik yang sama! 🎯
 
-✅ *Yang di-reset:*
-• 📊 Seasonal Points — mulai dari 0
-• 📅 Seasonal Activity — mulai dari 0
-• ⚔️ Seasonal Max Streak — mulai dari 0
-• 🏅 Season Badges — mulai berburu dari awal
-• 🏆 Rank & Seasonal Leaderboard — reset
-
-💾 *Yang tetap tersimpan:*
-• 🔥 Streak mingguan — lanjutkan!
-• 🏅 Achievement archive — yang sudah pernah unlock tetap tersimpan
-• 🛡️ Centurion Cycles — tetap berlaku
-
-❄️ *Streak Freeze* — reset ke 1 tiap season. Dapat +1 lagi saat capai 4 minggu streak!
-
-🆕 *Season %d dimulai SEKARANG!*
-Semua peserta mulai dari titik yang sama untuk seasonal ranking. Ayo berburu rank dari awal! 💪
+🆕 *Season %d dimulai SEKARANG — semua peserta mulai dari titik nol yang sama!* 💪
 
 📌 Langsung laporkan aktivitas pertamamu di Season %d dengan mengirim /lapor!
 
-*Semangat Season %d!* 🚀🔥`, sessionNumber, seasonTransition, sessionNumber, sessionNumber, sessionNumber)
+🌐 Lihat klasemen & stats: https://lapor-bot.web.id/
+
+*Semangat Season %d!* 🚀🔥`, sessionNumber, sessionNumber, sessionNumber, sessionNumber)
 }
+
+// SeasonAnnouncement returns the standard "new season has begun" announcement
+// text for the given session number. It is exported so the bot can announce a
+// season start independently (e.g. via a scheduled one-shot message).
+func SeasonAnnouncement(sessionNumber int) string {
+	return buildSeasonResetAnnouncement(sessionNumber)
+}
+
+// FreshStartAnnouncement returns the announcement text for a full data wipe.
+// Unlike SeasonAnnouncement, it states that ALL data (including lifetime) has
+// been cleared so every hunter truly starts from zero. It is used when Season 1
+// was a trial and the whole database was reset.
+func FreshStartAnnouncement() string {
+	return `🔄 *MULAI BARU DARI NOL!* 🔄
+
+Halo para pejuang keringat! 🏋️‍♂️
+
+Season 1 kemarin adalah *masa trial*, dan sistem poinnya masih belum stabil. Jadi sekarang kita mulai *benar-benar dari 0* — semua data dihapus total! 🧹
+
+✅ *Yang di-reset penuh:*
+• 📊 Points, EXP & Level — kembali ke 0
+• 🔥 Streak & Max Streak — semua kembali ke 0
+• 🏅 Semua Achievements & Badges — mulai dikumpulkan lagi
+• 📅 Riwayat Aktivitas & Goals — dibersihkan
+• 🎭 Atribut (STR/STA/AGI/VIT/END/LUK) — reset ke baseline
+• 🏆 Leaderboard & Rank — kosong, semua setara
+
+🎯 *Kenapa di-reset?*
+Karena nilai & aturan Season 1 masih trial dan belum final. Supaya adil, semua peserta mulai dari titik nol yang sama dengan sistem poin yang sudah disempurnakan. 💪
+
+📌 *Langkah pertama kamu di Season 2:*
+Kirim /lapor untuk laporan aktivitas pertama kamu dan mulai membangun skor dari awal!
+
+*Semangat Season 2 yang baru!* 🚀🔥
+`}
 
 // ScheduleSessionReset starts a background goroutine that automatically resets
 // season data every 4 months (Jan 1, May 1, Sep 1) at 00:00 WIB.

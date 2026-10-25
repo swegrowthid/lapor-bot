@@ -10,7 +10,8 @@
   "dependencies": {
     "@lapor-bot/contract": "*",
     "@lapor-bot/design-system": "*",
-    "@lapor-bot/shared": "*"
+    "@lapor-bot/shared": "*",
+    "lucide-react": "^1.21.0"
   },
   "peerDependencies": {
     "react": "*",
