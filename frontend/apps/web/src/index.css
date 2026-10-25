@@ -1,281 +1,105 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap");
 @import "tailwindcss";
+@import "@lapor-bot/design-system/src/tokens.css";
 
+/* Web UI source of truth for component markup lives in packages/ui/src/web.
+   Tailwind v4 content detection must be pointed there explicitly; relative
+   @source paths below this app resolve only from the project root, which is
+   why the path climbs to it. */
+@source "../../../packages/ui/src";
+
+/* Theme-aware color roles -> Tailwind utility namespaces. `inline` inlines
+   the var() reference per utility so classes like bg-panel / text-ink-muted
+   react to [data-theme] without any bridge CSS. */
+@theme inline {
+  --color-page: var(--page);
+  --color-page-sunken: var(--page-sunken);
+  --color-panel: var(--panel);
+  --color-panel-raised: var(--panel-raised);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-positive: var(--positive);
+  --color-positive-soft: var(--positive-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-silver: var(--silver);
+  --color-silver-soft: var(--silver-soft);
+  --color-bronze: var(--bronze);
+  --color-bronze-soft: var(--bronze-soft);
+}
+
+/* Static structural tokens (see packages/design-system/src/tokens.ts). */
 @theme {
-  --color-dark-bg: #0a0f1a;
-  --color-dark-card: #111928;
-  --color-dark-border: #1e293b;
-  --color-dark-input: #162032;
-
-  --color-system-blue: #3b82f6;
-  --color-system-purple: #8b5cf6;
-  --color-system-red: #ef4444;
-  --color-system-gold: #f59e0b;
-  --color-system-green: #22c55e;
-  /* Electric lime — sports energy accent (think pitch lines / kit volt). */
-  --color-system-volt: #a3e635;
-
-  --color-gray-850: #1a1f2e;
-
-  --font-orbitron: "Orbitron", sans-serif;
-  --font-inter: "Rajdhani", sans-serif;
-
-  --shadow-neon-blue: 0 0 15px rgba(59, 130, 246, 0.35);
-  --shadow-neon-purple: 0 0 15px rgba(139, 92, 246, 0.35);
-  --shadow-neon-red: 0 0 15px rgba(239, 68, 68, 0.35);
-  --shadow-neon-gold: 0 0 15px rgba(245, 158, 11, 0.35);
-  --shadow-neon-green: 0 0 15px rgba(34, 197, 94, 0.35);
-  --shadow-neon-volt: 0 0 15px rgba(163, 230, 53, 0.35);
-
-  --animate-fade-in: fade-in 0.25s ease-out both;
-  --animate-fade-in-up: fade-in-up 0.45s ease-out both;
-  --animate-scale-in: scale-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
-  --animate-pop: pop 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
-  --animate-pulse-glow: pulse-glow 2.2s ease-in-out infinite;
-
-  @keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  @keyframes fade-in-up {
-    from { opacity: 0; transform: translateY(12px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes scale-in {
-    from { opacity: 0; transform: scale(0.96) translateY(8px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
-  }
-
-  /* Badge entrance — medals and live indicators spring in. */
-  @keyframes pop {
-    from { opacity: 0; transform: scale(0.6); }
-    to { opacity: 1; transform: scale(1); }
-  }
-
-  /* Expanding ring — "live" / match-day energy on the #1 spot. */
-  @keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(163, 230, 53, 0.45); }
-    50% { box-shadow: 0 0 0 6px rgba(163, 230, 53, 0); }
-  }
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --shadow-xs: 0 1px 2px rgba(16, 20, 28, 0.05);
+  --shadow-sm: 0 1px 3px rgba(16, 20, 28, 0.07), 0 1px 2px rgba(16, 20, 28, 0.05);
+  --shadow-md: 0 4px 12px rgba(16, 20, 28, 0.08);
+  --shadow-lg: 0 12px 32px rgba(16, 20, 28, 0.14);
 }
 
 @layer base {
-  :root,
-  [data-theme='light'] {
-    color-scheme: light;
-    --app-bg: #f8fafc;
-    --app-bg-soft: #f1f5f9;
-    --app-card: rgba(255, 255, 255, 0.82);
-    --app-card-strong: rgba(248, 250, 252, 0.95);
-    --app-header-bg: rgba(248, 250, 252, 0.85);
-    --app-border: rgba(59, 130, 246, 0.18);
-    --app-text: #0f172a;
-    --app-text-soft: #475569;
-    --app-text-muted: #64748b;
-    --app-grid: rgba(59, 130, 246, 0.06);
-    --app-spot: rgba(34, 197, 94, 0.10);
-    --app-track: #e2e8f0;
-    --app-thumb: #94a3b8;
-  }
-
-  /* Volt roles per theme: raw #a3e635 fails contrast on light surfaces, so
-     light mode shifts to lime-700 (passes AA for small text). Declared
-     per-theme — never in the shared :root block — so dark keeps #a3e635. */
-  [data-theme='light'] {
-    --color-system-volt: #4d7c0f;
-  }
-
-  [data-theme='dark'] {
-    color-scheme: dark;
-    --app-bg: #0a0f1a;
-    --app-bg-soft: #101829;
-    --app-card: rgba(17, 25, 40, 0.78);
-    --app-card-strong: rgba(10, 15, 26, 0.92);
-    --app-header-bg: rgba(10, 15, 26, 0.82);
-    --app-border: rgba(59, 130, 246, 0.15);
-    --app-text: #f1f5f9;
-    --app-text-soft: #cbd5e1;
-    --app-text-muted: #64748b;
-    --app-grid: rgba(59, 130, 246, 0.06);
-    --app-spot: rgba(163, 230, 53, 0.08);
-    --app-track: #0a0f1a;
-    --app-thumb: #1e293b;
-    --color-system-volt: #a3e635;
-  }
-
   body {
-    @apply font-inter antialiased;
-    color: var(--app-text);
-    background-color: var(--app-bg);
-    background-image:
-      /* Stadium floodlight cone from the top of the page */
-      radial-gradient(65% 40% at 50% -8%, var(--app-spot) 0, transparent 62%),
-      linear-gradient(135deg, transparent 0 48%, var(--app-grid) 48% 52%, transparent 52% 100%),
-      radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.16) 0, transparent 45%),
-      radial-gradient(at 100% 100%, rgba(245, 158, 11, 0.10) 0, transparent 45%);
-    background-size: auto, 42px 42px, auto, auto;
-    background-attachment: fixed;
+    color: var(--ink);
+    background-color: var(--page);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
     padding-left: env(safe-area-inset-left, 0px);
     padding-right: env(safe-area-inset-right, 0px);
   }
 
-  /* iOS Safari input zoom: prevent viewport zoom on focus by using 16px+ font-size on narrow screens. */
+  /* iOS Safari: 16px+ inputs on narrow screens prevent focus zoom. */
   @media (max-width: 639px) {
-    input, select, textarea {
+    input,
+    select,
+    textarea {
       font-size: 16px;
     }
   }
 }
 
-/* Custom scrollbars for a clean system look */
+/* Scrollbars follow the neutral surface, not the accent. */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
-
 ::-webkit-scrollbar-track {
-  background: var(--app-track);
+  background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: var(--app-thumb);
-  border-radius: 4px;
+  background: var(--border-strong);
+  border-radius: 8px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: #3b82f6;
+  background: var(--ink-faint);
 }
 
-/* Glassmorphism utility */
-.glass {
-  background: var(--app-card);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--app-border);
-  box-shadow: 0 24px 60px rgba(10, 15, 26, 0.14);
-}
-
-.glass-glow-blue {
-  border-color: color-mix(in srgb, var(--color-system-blue) 25%, transparent);
-  box-shadow: 0 0 15px color-mix(in srgb, var(--color-system-blue) 10%, transparent);
-}
-
-.glass-glow-purple {
-  border-color: color-mix(in srgb, var(--color-system-purple) 25%, transparent);
-  box-shadow: 0 0 15px color-mix(in srgb, var(--color-system-purple) 10%, transparent);
-}
-
-.glass-glow-red {
-  border-color: color-mix(in srgb, var(--color-system-red) 25%, transparent);
-  box-shadow: 0 0 15px color-mix(in srgb, var(--color-system-red) 10%, transparent);
-}
-
-.glass-glow-gold {
-  border-color: color-mix(in srgb, var(--color-system-gold) 25%, transparent);
-  box-shadow: 0 0 15px color-mix(in srgb, var(--color-system-gold) 10%, transparent);
-}
-
-.glass-glow-green {
-  border-color: color-mix(in srgb, var(--color-system-green) 25%, transparent);
-  box-shadow: 0 0 15px color-mix(in srgb, var(--color-system-green) 10%, transparent);
-}
-
-.glass-glow-volt {
-  border-color: color-mix(in srgb, var(--color-system-volt) 30%, transparent);
-  box-shadow: 0 0 15px color-mix(in srgb, var(--color-system-volt) 12%, transparent);
-}
-
-/* Sticky HUD header — frosted bar that keeps global actions on screen. */
-.header-glass {
-  background: var(--app-header-bg);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-}
-
-/* Scoreboard numbers: equal-width digits so stats and ranks align like a
-   broadcast overlay instead of jittering between proportional glyphs. */
-.tnum {
+/* Scoreboard numbers: equal-width lining digits so ranks, points and streaks
+   align down a column. Prefer the Tailwind `tabular-nums` utility in new
+   markup; `.tnum` is its one-word alias used across the web components. */
+.tnum,
+.tabular {
   font-variant-numeric: tabular-nums;
-}
-
-/* Physical press feedback: instant scale snap on tap/click.
-   Implemented without a transition shorthand so it never overrides
-   Tailwind's transition-colors/transition-all at call sites. */
-.btn-press:active:not(:disabled) {
-  transform: scale(0.94);
-}
-
-/* Light sweep across cards on hover — broadcast highlight reel feel.
-   overflow:hidden clips the translated pseudo-element to the card. */
-.card-sheen {
-  position: relative;
-  overflow: hidden;
-}
-.card-sheen::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(
-    115deg,
-    transparent 32%,
-    rgba(255, 255, 255, 0.07) 48%,
-    transparent 62%
-  );
-  transform: translateX(-130%);
-  transition: transform 0.7s ease;
-  pointer-events: none;
-}
-.card-sheen:hover::after {
-  transform: translateX(130%);
-}
-
-/* Colored edge strip on top of stat cards, like jersey trim. Set --edge
-   inline per tone. */
-.stat-edge {
-  position: relative;
-}
-.stat-edge::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 18px;
-  right: 18px;
-  height: 3px;
-  border-radius: 999px;
-  background: var(--edge, var(--color-system-blue));
-  opacity: 0.85;
-}
-
-/* Podium rows: medal-colored rail on the rank cell + faint tint so the
-   top 3 read as a podium, not just rows. */
-.tr-podium-1 {
-  background: linear-gradient(90deg, rgba(245, 158, 11, 0.12), transparent 55%);
-}
-.tr-podium-1 td:first-child {
-  box-shadow: inset 3px 0 0 var(--color-system-gold);
-}
-.tr-podium-2 {
-  background: linear-gradient(90deg, rgba(203, 213, 225, 0.08), transparent 55%);
-}
-.tr-podium-2 td:first-child {
-  box-shadow: inset 3px 0 0 #cbd5e1;
-}
-.tr-podium-3 {
-  background: linear-gradient(90deg, rgba(180, 83, 9, 0.10), transparent 55%);
-}
-.tr-podium-3 td:first-child {
-  box-shadow: inset 3px 0 0 #b45309;
-}
-
-/* Staggered entrance: pair .stagger-children on a container with
-   .animate-fade-in-up on each child. Capped so late items never lag. */
-.stagger-children > * {
-  animation-delay: calc(var(--stagger-i, 0) * 45ms);
 }
 
 /* Thin horizontal scroll strips (tab bars) stay clean cross-browser. */
@@ -286,11 +110,59 @@
   display: none;
 }
 
-/* Keyboard accessibility: visible focus ring for interactive elements. */
+/* Keyboard accessibility: visible focus ring in both themes. */
 :focus-visible {
-  outline: 2px solid var(--color-system-blue);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* Podium rows: a calm medal tint behind the top 3 rows; the medal pill itself
+   (in RankBadge) carries the real distinction. */
+.tr-podium-1 {
+  background: linear-gradient(90deg, var(--gold-soft), transparent 60%);
+}
+.tr-podium-2 {
+  background: linear-gradient(90deg, var(--silver-soft), transparent 60%);
+}
+.tr-podium-3 {
+  background: linear-gradient(90deg, var(--bronze-soft), transparent 60%);
+}
+
+/* Staggered entrance: pair .stagger-children on a container with
+   .animate-fade-in-up on each child. Capped so late items never lag. */
+.stagger-children > * {
+  animation-delay: calc(var(--stagger-i, 0) * 40ms);
+}
+
+/* Named entrance animations used across web components. */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.97) translateY(6px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes pop {
+  from { opacity: 0; transform: scale(0.6); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out both;
+}
+.animate-fade-in-up {
+  animation: fade-in-up 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.animate-scale-in {
+  animation: scale-in 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.animate-pop {
+  animation: pop 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* Respect reduced-motion preferences. */
@@ -303,30 +175,3 @@
     transition-duration: 0.01ms !important;
   }
 }
-
-/* Theme bridge for existing Tailwind utility-heavy components. */
-[data-theme='light'] .text-white { color: var(--app-text); }
-[data-theme='light'] .text-gray-300,
-[data-theme='light'] .text-gray-400 { color: var(--app-text-soft); }
-[data-theme='light'] .text-gray-500,
-[data-theme='light'] .text-gray-600 { color: var(--app-text-muted); }
-[data-theme='light'] .bg-gray-950,
-[data-theme='light'] .bg-gray-950\/80,
-[data-theme='light'] .bg-gray-950\/70,
-[data-theme='light'] .bg-gray-950\/60,
-[data-theme='light'] .bg-gray-950\/50,
-[data-theme='light'] .bg-gray-950\/40,
-[data-theme='light'] .bg-gray-900,
-[data-theme='light'] .bg-gray-900\/60,
-[data-theme='light'] .bg-gray-900\/50,
-[data-theme='light'] .bg-gray-800\/40,
-[data-theme='light'] .bg-gray-800\/20 { background-color: var(--app-card-strong); }
-[data-theme='light'] .border-gray-900\/60,
-[data-theme='light'] .border-gray-850,
-[data-theme='light'] .border-gray-800,
-[data-theme='light'] .border-gray-800\/80,
-[data-theme='light'] .border-gray-800\/60,
-[data-theme='light'] .border-gray-700 { border-color: var(--app-border); }
-[data-theme='light'] input,
-[data-theme='light'] select { color: var(--app-text); }
-[data-theme='light'] option { background: #f8fafc; color: #0f172a; }

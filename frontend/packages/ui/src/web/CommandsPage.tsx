@@ -7,7 +7,6 @@ import {
   CircleHelp,
   Copy,
   Dumbbell,
-  Footprints,
   Globe,
   Link2,
   MessageCircle,
@@ -22,7 +21,7 @@ import {
 } from "lucide-react";
 
 /* -------------------------------------------------------------------------- */
-/* Data — source of truth: internal/app/usecase/get_help_usecase.go            */
+/* Data - source of truth: internal/app/usecase/get_help_usecase.go            */
 /* -------------------------------------------------------------------------- */
 
 interface WhatsAppCommand {
@@ -55,7 +54,7 @@ const WHATSAPP_CATEGORIES: CommandCategory[] = [
         syntax: "/lapor",
         aliases: ["#lapor"],
         description:
-          "Laporkan workout atau aktivitas harianmu. Posisi command fleksibel — bisa di awal, tengah, atau akhir kalimat.",
+          "Laporkan workout atau aktivitas harianmu. Posisi command fleksibel - bisa di awal, tengah, atau akhir kalimat.",
         examples: ["/lapor", "/lapor Push Day", "gym pagi ini /lapor"],
         note: "Max 3x laporan per hari. Laporan ke-2 dan ke-3 tetap dihitung 1 hari, tapi XP dibagi 2. Kamu punya 1 Streak Freeze gratis per season, +1 lagi setiap mencapai 4 minggu streak.",
       },
@@ -63,7 +62,7 @@ const WHATSAPP_CATEGORIES: CommandCategory[] = [
         syntax: "/lapor-kemarin",
         aliases: ["#lapor-kemarin"],
         description:
-          "Laporan khusus untuk hari kemarin — berguna kalau lupa lapor. Sama seperti /lapor, XP dibagi 2.",
+          "Laporan khusus untuk hari kemarin - berguna kalau lupa lapor. Sama seperti /lapor, XP dibagi 2.",
         examples: ["/lapor-kemarin lari 5K", "/lapor-kemarin gym"],
         note: "Max 3x per hari, berbagi slot dengan laporan hari ini.",
       },
@@ -71,14 +70,14 @@ const WHATSAPP_CATEGORIES: CommandCategory[] = [
         syntax: "/lapor jalan kaki [jumlah]",
         aliases: ["#lapor jalan kaki [jumlah]"],
         description:
-          "Catat langkah harian sebagai laporan utama — masuk streak, XP, leaderboard, dan klasemen langkah di web.",
+          "Catat langkah harian sebagai laporan utama - masuk streak, XP, leaderboard, dan klasemen langkah di web.",
         examples: [
           "/lapor jalan kaki 5000",
           "/lapor jalan kaki 12.500",
           "/lapor jalan kaki 8rb",
           "walking 6500 steps /lapor",
         ],
-        note: "Angka langkah WAJIB (min 100, max 250.000) — tanpa angka valid laporan tidak tercatat. Format bebas: 12.500, 12,500, 8rb, 8k, atau nempel 12500langkah. Durasi seperti `jalan 30 menit` dianggap laporan biasa.",
+        note: "Angka langkah WAJIB (min 100, max 250.000) - tanpa angka valid laporan tidak tercatat. Format bebas: 12.500, 12,500, 8rb, 8k, atau nempel 12500langkah. Durasi seperti `jalan 30 menit` dianggap laporan biasa.",
       },
     ],
   },
@@ -87,14 +86,14 @@ const WHATSAPP_CATEGORIES: CommandCategory[] = [
     icon: Sparkles,
     title: "Side Quest Harian",
     summary:
-      "Quest bonus harian untuk hunter yang sudah punya job — easy, medium, dan hard dengan XP bonus per difficulty.",
+      "Quest bonus harian untuk hunter yang sudah punya job - easy, medium, dan hard dengan XP bonus per difficulty.",
     commands: [
       {
         syntax: "/lapor sidequest",
         aliases: ["#lapor sidequest"],
         description:
           "Lihat daftar side quest easy, medium, dan hard hari ini untuk profilmu.",
-        note: "Easy: jalan kaki min 4.000 langkah atau sepeda 5 km. Medium/hard: latihan ringan yang naik sedikit sesuai level job.",
+        note: "Easy: jalan kaki min 4.000 langkah atau sepeda 5 km. Medium/hard: latihan ringan yang naik sedikit sesuai rank job.",
       },
       {
         syntax: "/lapor sidequest [kegiatan] [jumlah]",
@@ -115,7 +114,7 @@ const WHATSAPP_CATEGORIES: CommandCategory[] = [
     icon: XCircle,
     title: "Membatalkan Laporan",
     summary:
-      "Salah input? Batalkan laporanmu — hanya bisa pada hari yang sama dengan laporan.",
+      "Salah input? Batalkan laporanmu - hanya bisa pada hari yang sama dengan laporan.",
     commands: [
       {
         syntax: "/cancel",
@@ -193,7 +192,7 @@ const WEBSITE_STEPS: WebsiteStep[] = [
     icon: Trophy,
     title: "Buka Leaderboard",
     description:
-      "Klasemen season, ranking, streak, dan klasemen langkah bisa dilihat siapa saja — tanpa perlu login.",
+      "Klasemen season, ranking, streak, dan klasemen langkah bisa dilihat siapa saja - tanpa perlu login.",
   },
   {
     icon: UserCircle2,
@@ -211,7 +210,7 @@ const WEBSITE_STEPS: WebsiteStep[] = [
     icon: Send,
     title: "Lapor Langsung dari Web",
     description:
-      "Panel Lapor Hari Ini di halaman personal bekerja persis seperti /lapor — termasuk lapor sidequest. Berbagi kuota 3x/hari dengan WhatsApp.",
+      "Panel Lapor Hari Ini di halaman personal bekerja persis seperti /lapor - termasuk lapor sidequest. Berbagi kuota 3x/hari dengan WhatsApp.",
   },
   {
     icon: Target,
@@ -249,7 +248,7 @@ function SyntaxChip({ text }: { text: string }) {
     try {
       await navigator.clipboard.writeText(text);
     } catch {
-      // Clipboard API blocked (non-secure context / permission) — fall back
+      // Clipboard API blocked (non-secure context / permission) - fall back
       // to the legacy selection path so the feature still works everywhere.
       const ta = document.createElement("textarea");
       ta.value = text;
@@ -260,7 +259,7 @@ function SyntaxChip({ text }: { text: string }) {
       try {
         document.execCommand("copy");
       } catch {
-        // Give up silently — the chip is still readable text.
+        // Give up silently - the chip is still readable text.
       }
       document.body.removeChild(ta);
     }
@@ -275,15 +274,16 @@ function SyntaxChip({ text }: { text: string }) {
       onClick={copy}
       title={copied ? "Tersalin!" : `Salin ${text}`}
       aria-label={`Salin command ${text}`}
-      className="group/chip inline-flex max-w-full items-center gap-1.5 min-h-[32px] rounded-lg border border-system-green/30 bg-system-green/10 px-2.5 font-mono text-xs font-semibold text-system-green shadow-[inset_0_0_10px_rgba(34,197,94,0.08)] hover:bg-system-green/20 hover:border-system-green/50 transition-colors cursor-pointer"
+      className="group/chip inline-flex max-w-full items-center gap-1.5 min-h-[32px] rounded-md border border-border bg-page-sunken px-2.5 font-mono text-xs font-medium text-ink-soft hover:bg-panel-raised hover:border-border-strong transition-colors cursor-pointer"
     >
       <span className="truncate">{text}</span>
       {copied ? (
-        <Check size={12} className="shrink-0 text-system-volt" />
+        <Check size={12} className="shrink-0 text-positive" aria-hidden="true" />
       ) : (
         <Copy
           size={12}
-          className="shrink-0 opacity-40 group-hover/chip:opacity-100 transition-opacity"
+          className="shrink-0 text-ink-muted opacity-40 group-hover/chip:opacity-100 group-focus-visible/chip:opacity-100 transition-opacity"
+          aria-hidden="true"
         />
       )}
     </button>
@@ -292,28 +292,28 @@ function SyntaxChip({ text }: { text: string }) {
 
 function CommandCard({ command }: { command: WhatsAppCommand }) {
   return (
-    <article className="glass rounded-2xl p-4 sm:p-5 border border-gray-800 hover:border-gray-700 transition-colors">
+    <article className="rounded-lg border border-border bg-panel shadow-xs p-4 sm:p-5">
       <div className="flex flex-wrap items-center gap-2">
         <SyntaxChip text={command.syntax} />
         {command.aliases?.map((alias) => (
           <SyntaxChip key={alias} text={alias} />
         ))}
       </div>
-      <p className="mt-3 text-sm text-gray-300 leading-relaxed">
+      <p className="mt-3 text-sm text-ink-soft leading-relaxed">
         {command.description}
       </p>
       {command.examples && command.examples.length > 0 && (
-        <div className="mt-3 rounded-xl bg-gray-950/70 border border-gray-800/70 px-3 py-2.5">
-          <p className="text-[10px] font-mono uppercase tracking-widest text-gray-600 mb-1.5">
-            Contoh
-          </p>
+        <div className="mt-3 rounded-md border border-border bg-page-sunken px-3 py-2.5">
+          <p className="mb-1.5 text-xs font-medium text-ink-muted">Contoh</p>
           <ul className="space-y-1">
             {command.examples.map((example) => (
               <li
                 key={example}
-                className="font-mono text-xs text-gray-400 flex items-center gap-2"
+                className="flex items-center gap-2 font-mono text-xs text-ink-soft"
               >
-                <span className="text-system-green/60 select-none">›</span>
+                <span aria-hidden="true" className="select-none text-ink-muted">
+                  ›
+                </span>
                 {example}
               </li>
             ))}
@@ -321,7 +321,7 @@ function CommandCard({ command }: { command: WhatsAppCommand }) {
         </div>
       )}
       {command.note && (
-        <p className="mt-3 text-[11px] font-mono leading-relaxed text-gray-500 border-l-2 border-system-gold/40 pl-3">
+        <p className="mt-3 border-l-2 border-border-strong pl-3 text-xs text-ink-muted leading-relaxed">
           {command.note}
         </p>
       )}
@@ -343,22 +343,25 @@ function CategorySection({
       aria-labelledby={`command-${category.id}-heading`}
       className="scroll-mt-24"
     >
-      <header className="mb-4">
-        <p className="font-orbitron text-[10px] uppercase tracking-[0.25em] text-system-green/70">
-          {String(index + 1).padStart(2, "0")} / {category.title}
-        </p>
+      <header>
         <h3
           id={`command-${category.id}-heading`}
-          className="mt-1.5 text-base sm:text-lg font-bold font-orbitron text-white flex items-center gap-2"
+          className="flex items-center gap-2.5 text-base sm:text-lg font-semibold text-ink"
         >
-          <Icon size={18} className="text-system-green shrink-0" />
+          <span
+            aria-hidden="true"
+            className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-border bg-page-sunken text-xs font-semibold text-ink-muted tabular-nums"
+          >
+            {index + 1}
+          </span>
+          <Icon size={18} className="shrink-0 text-ink-soft" aria-hidden="true" />
           {category.title}
         </h3>
-        <p className="mt-1 text-xs text-gray-500 font-mono leading-relaxed max-w-2xl">
+        <p className="mt-1.5 text-sm text-ink-muted leading-relaxed max-w-2xl">
           {category.summary}
         </p>
       </header>
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
         {category.commands.map((command) => (
           <CommandCard key={command.syntax} command={command} />
         ))}
@@ -370,29 +373,48 @@ function CategorySection({
 function WhatsAppGuide() {
   return (
     <div className="space-y-10">
-      {/* Quick start strip */}
-      <div className="glass glass-glow-green rounded-2xl p-4 sm:p-5 border border-system-green/20">
-        <p className="font-orbitron text-xs font-bold uppercase tracking-widest text-system-green flex items-center gap-2">
-          <Terminal size={14} />
+      <div className="rounded-lg bg-accent-soft p-4 sm:p-5">
+        <p className="flex items-center gap-2 text-sm font-semibold text-ink">
+          <Terminal
+            size={14}
+            className="shrink-0 text-accent"
+            aria-hidden="true"
+          />
           Quick Start
         </p>
-        <ol className="mt-3 grid gap-2 sm:grid-cols-3 text-xs font-mono text-gray-300">
+        <ol className="mt-3 grid gap-2 text-sm text-ink-soft sm:grid-cols-3">
           <li className="flex items-start gap-2">
-            <span className="text-system-green font-bold shrink-0">1.</span>
+            <span
+              aria-hidden="true"
+              className="shrink-0 font-semibold text-accent tabular-nums"
+            >
+              1.
+            </span>
             Kirim <SyntaxChip text="/lapor" /> di grup WhatsApp
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-system-green font-bold shrink-0">2.</span>
-            Bot membalas & progresmu tercatat
+            <span
+              aria-hidden="true"
+              className="shrink-0 font-semibold text-accent tabular-nums"
+            >
+              2.
+            </span>
+            Bot membalas &amp; progresmu tercatat
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-system-green font-bold shrink-0">3.</span>
+            <span
+              aria-hidden="true"
+              className="shrink-0 font-semibold text-accent tabular-nums"
+            >
+              3.
+            </span>
             Cek ranking-mu di leaderboard web
           </li>
         </ol>
-        <p className="mt-3 text-[11px] font-mono text-gray-500">
-          Semua command bisa pakai awalan <span className="text-gray-300">/</span>{" "}
-          atau <span className="text-gray-300">#</span> — fungsinya identik.
+        <p className="mt-3 text-xs text-ink-muted leading-relaxed">
+          Semua command bisa pakai awalan{" "}
+          <span className="font-medium text-ink">/</span> atau{" "}
+          <span className="font-medium text-ink">#</span> - fungsinya identik.
           Bot hanya merespon di grup yang sudah dikonfigurasi.
         </p>
       </div>
@@ -408,41 +430,40 @@ function WebsiteGuide() {
   return (
     <div className="space-y-10">
       <section aria-labelledby="website-steps-heading">
-        <header className="mb-4">
-          <p className="font-orbitron text-[10px] uppercase tracking-[0.25em] text-system-blue/80">
-            01 / Cara Pakai Website
-          </p>
+        <header>
           <h3
             id="website-steps-heading"
-            className="mt-1.5 text-base sm:text-lg font-bold font-orbitron text-white flex items-center gap-2"
+            className="flex items-center gap-2 text-base sm:text-lg font-semibold text-ink"
           >
-            <Globe size={18} className="text-system-blue shrink-0" />
+            <Globe size={18} className="shrink-0 text-ink-soft" aria-hidden="true" />
             Dari Penonton Jadi Hunter
           </h3>
-          <p className="mt-1 text-xs text-gray-500 font-mono leading-relaxed max-w-2xl">
-            {WEBSITE_URL} — semua fitur di bawah berbagi data yang sama dengan
+          <p className="mt-1.5 text-sm text-ink-muted leading-relaxed max-w-2xl">
+            {WEBSITE_URL} - semua fitur di bawah berbagi data yang sama dengan
             bot WhatsApp.
           </p>
         </header>
-        <ol className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ol className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {WEBSITE_STEPS.map((step, i) => {
             const Icon = step.icon;
             return (
               <li
                 key={step.title}
-                className="glass rounded-2xl p-4 sm:p-5 border border-gray-800 relative overflow-hidden"
+                className="rounded-lg border border-border bg-panel shadow-xs p-4 sm:p-5"
               >
-                <span
-                  aria-hidden="true"
-                  className="absolute -top-2 -right-1 font-orbitron text-5xl font-black text-gray-800/50 select-none"
-                >
-                  {i + 1}
-                </span>
-                <Icon size={20} className="text-system-volt" />
-                <h4 className="mt-3 text-sm font-bold font-orbitron text-white">
+                <div className="flex items-center justify-between">
+                  <Icon size={20} className="text-ink-soft" aria-hidden="true" />
+                  <span
+                    aria-hidden="true"
+                    className="text-xs font-semibold text-ink-muted tabular-nums"
+                  >
+                    {i + 1}
+                  </span>
+                </div>
+                <h4 className="mt-3 text-sm font-semibold text-ink">
                   {step.title}
                 </h4>
-                <p className="mt-1.5 text-xs text-gray-400 leading-relaxed">
+                <p className="mt-1.5 text-sm text-ink-soft leading-relaxed">
                   {step.description}
                 </p>
               </li>
@@ -452,21 +473,22 @@ function WebsiteGuide() {
       </section>
 
       <section aria-labelledby="website-note-heading">
-        <div className="glass rounded-2xl p-4 sm:p-5 border border-system-blue/25 flex items-start gap-3">
+        <div className="flex items-start gap-3 rounded-lg border border-border bg-page-sunken p-4 sm:p-5">
           <CalendarClock
             size={18}
-            className="text-system-blue shrink-0 mt-0.5"
+            className="mt-0.5 shrink-0 text-info"
+            aria-hidden="true"
           />
           <div>
             <h4
               id="website-note-heading"
-              className="text-sm font-bold font-orbitron text-white"
+              className="text-sm font-semibold text-ink"
             >
               Satu Akun, Dua Pintu
             </h4>
-            <p className="mt-1 text-xs text-gray-400 leading-relaxed font-mono">
+            <p className="mt-1 text-sm text-ink-soft leading-relaxed">
               Laporan dari web dan WhatsApp masuk ke streak, XP, dan leaderboard
-              yang sama. Kuota 3x/hari juga dibagi — lapor lewat mana pun,
+              yang sama. Kuota 3x/hari juga dibagi - lapor lewat mana pun,
               progresnya tetap satu.
             </p>
           </div>
@@ -493,7 +515,7 @@ interface CommandsPageProps {
 }
 
 /**
- * Public "Panduan & Commands" page — reachable from the leaderboard so people
+ * Public "Panduan & Commands" page - reachable from the leaderboard so people
  * who have never used the bot can learn every WhatsApp command and website
  * feature before joining.
  */
@@ -502,37 +524,35 @@ export function CommandsPage({ onBack }: CommandsPageProps) {
 
   return (
     <div className="max-w-4xl mx-auto">
-      {/* Hero */}
       <div className="mb-8">
         <button
           type="button"
           onClick={onBack}
-          className="btn-press flex items-center gap-1.5 min-h-[44px] px-3 -ml-3 rounded-xl text-xs font-mono text-gray-400 hover:text-white transition-colors"
+          className="flex min-h-[44px] items-center gap-1.5 rounded-md border border-border bg-panel px-4 text-sm text-ink-soft transition-colors hover:bg-panel-raised hover:text-ink"
         >
-          <ChevronLeft size={14} />
+          <ChevronLeft size={14} aria-hidden="true" />
           Kembali ke Leaderboard
         </button>
-        <div className="mt-2 flex items-start gap-3">
-          <div className="shrink-0 w-11 h-11 rounded-2xl bg-system-green/10 border border-system-green/30 flex items-center justify-center shadow-neon-green">
-            <Terminal size={20} className="text-system-green" />
+        <div className="mt-3 flex items-start gap-3">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-accent-soft">
+            <Terminal size={20} className="text-accent" aria-hidden="true" />
           </div>
           <div className="min-w-0">
-            <h2 className="text-xl sm:text-2xl font-black font-orbitron tracking-wider text-white uppercase">
+            <h2 className="text-xl font-bold text-ink sm:text-2xl">
               Panduan &amp; Commands
             </h2>
-            <p className="mt-1 text-xs sm:text-sm text-gray-500 font-mono leading-relaxed">
-              Semua cara memakai Lapor Bot — di WhatsApp dan di website. Klik
+            <p className="mt-1 text-sm leading-relaxed text-ink-muted">
+              Semua cara memakai Lapor Bot - di WhatsApp dan di website. Klik
               command mana pun untuk menyalinnya.
             </p>
           </div>
         </div>
       </div>
 
-      {/* Platform toggle — mirrors the ProgramTabBar pill pattern */}
       <div
         role="tablist"
         aria-label="Pilih platform panduan"
-        className="mb-8 flex flex-nowrap overflow-x-auto scrollbar-none bg-gray-950/80 p-1.5 rounded-xl border border-gray-800/60 w-full sm:w-auto sm:max-w-fit"
+        className="mb-8 flex w-full flex-nowrap overflow-x-auto scrollbar-none rounded-md bg-page-sunken p-1 sm:w-auto sm:max-w-fit"
       >
         {PLATFORMS.map((p) => {
           const Icon = p.icon;
@@ -545,13 +565,13 @@ export function CommandsPage({ onBack }: CommandsPageProps) {
               aria-selected={active}
               aria-controls={`commands-panel-${p.id}`}
               onClick={() => setPlatform(p.id)}
-              className={`flex shrink-0 whitespace-nowrap items-center gap-2 px-4 py-2 min-h-[40px] rounded-lg text-xs font-bold font-orbitron tracking-wider transition-all uppercase ${
+              className={`flex min-h-[40px] shrink-0 items-center gap-2 whitespace-nowrap rounded-sm px-4 py-2 text-sm font-medium transition-colors ${
                 active
-                  ? "bg-gradient-to-r from-system-green to-system-volt text-gray-950 shadow-neon-volt"
-                  : "text-gray-400 hover:text-white hover:bg-gray-800/60"
+                  ? "bg-panel text-ink shadow-xs"
+                  : "text-ink-muted hover:text-ink"
               }`}
             >
-              <Icon size={14} />
+              <Icon size={14} aria-hidden="true" />
               {p.label}
             </button>
           );
@@ -566,23 +586,19 @@ export function CommandsPage({ onBack }: CommandsPageProps) {
         {platform === "whatsapp" ? <WhatsAppGuide /> : <WebsiteGuide />}
       </div>
 
-      {/* Footer CTA */}
-      <div className="mt-12 glass glass-glow-gold rounded-2xl p-5 sm:p-6 border border-gray-800 text-center">
-        <Footprints className="mx-auto text-system-gold mb-3" size={24} />
-        <p className="font-orbitron text-sm font-bold text-white uppercase tracking-wider">
-          Siap Mulai?
-        </p>
-        <p className="mt-2 text-xs text-gray-400 font-mono leading-relaxed max-w-md mx-auto">
-          Kirim <span className="text-system-green font-bold">/lapor</span>{" "}
-          pertamamu di grup WhatsApp, lalu kembali ke sini untuk melihat
-          namamu naik di klasemen.
+      <div className="mt-12 rounded-lg border border-border bg-panel p-5 text-center shadow-xs sm:p-6">
+        <h3 className="text-base font-semibold text-ink">Siap Mulai?</h3>
+        <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-ink-soft">
+          Kirim <span className="font-mono font-semibold text-ink">/lapor</span>{" "}
+          pertamamu di grup WhatsApp, lalu kembali ke sini untuk melihat namamu
+          naik di klasemen.
         </p>
         <button
           type="button"
           onClick={onBack}
-          className="btn-press mt-4 inline-flex items-center gap-2 px-5 py-2.5 min-h-[44px] rounded-xl bg-gradient-to-r from-system-green to-system-volt border border-system-volt/40 font-orbitron text-xs font-bold text-gray-950 uppercase tracking-wider shadow-neon-volt hover:brightness-110 transition-all"
+          className="mt-4 inline-flex min-h-[44px] items-center gap-2 rounded-md bg-accent px-4 py-2.5 text-sm font-semibold text-accent-fg transition-opacity hover:opacity-90"
         >
-          <Trophy size={14} />
+          <Trophy size={14} aria-hidden="true" />
           Lihat Leaderboard
         </button>
       </div>

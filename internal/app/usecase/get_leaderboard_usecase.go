@@ -62,9 +62,9 @@ func (uc *GetLeaderboardUsecase) Execute(ctx context.Context) (string, error) {
 		}
 
 		if weeksSinceLastReport <= 1 {
-			sb.WriteString(fmt.Sprintf("%d. %s%s — %d pts (%d hari season, %d hari lifetime, %d minggu streak 🔥)\n", rank, cyclePrefix, r.Name, r.SeasonalPoints, r.SeasonalActivityCount, r.TotalActiveDays(), r.Streak))
+			sb.WriteString(fmt.Sprintf("%d. %s%s — %d pts (%d hari season, %d hari total, %d minggu streak 🔥)\n", rank, cyclePrefix, r.Name, r.SeasonalPoints, r.SeasonalActivityCount, r.TotalActiveDays(), r.Streak))
 		} else {
-			sb.WriteString(fmt.Sprintf("%d. %s%s — %d pts (%d hari season, %d hari lifetime, 💔)\n", rank, cyclePrefix, r.Name, r.SeasonalPoints, r.SeasonalActivityCount, r.TotalActiveDays()))
+			sb.WriteString(fmt.Sprintf("%d. %s%s — %d pts (%d hari season, %d hari total, 💔)\n", rank, cyclePrefix, r.Name, r.SeasonalPoints, r.SeasonalActivityCount, r.TotalActiveDays()))
 		}
 		rank++
 	}
@@ -132,8 +132,7 @@ func (uc *GetLeaderboardUsecase) ExecuteRanks(ctx context.Context) (string, erro
 
 	sb := strings.Builder{}
 	sb.WriteString(fmt.Sprintf("🏹 *Season %d Ranks*\n", seasonNumber))
-	sb.WriteString(fmt.Sprintf("Reset badge/rank: %s\n", nextReset.Format("02-01-2006")))
-	sb.WriteString("Level & EXP lifetime tetap aman.\n\n")
+	sb.WriteString(fmt.Sprintf("Reset badge/rank: %s\n\n", nextReset.Format("02-01-2006")))
 
 	if len(active) == 0 {
 		sb.WriteString("Belum ada hunter aktif season ini. Mulai dengan /lapor 💪")
@@ -160,53 +159,6 @@ func (uc *GetLeaderboardUsecase) ExecuteRanks(ctx context.Context) (string, erro
 	}
 
 	sb.WriteString("\nRank dihitung dari seasonal points. Badge season ikut menambah poin, lalu reset saat season baru.")
-
-	return sb.String(), nil
-}
-
-// ExecuteLifetime returns a leaderboard ranked by lifetime total points (XP).
-// Lifetime points never reset across seasons.
-func (uc *GetLeaderboardUsecase) ExecuteLifetime(ctx context.Context) (string, error) {
-	reports, err := uc.repo.GetAllReports(ctx)
-	if err != nil {
-		return "", err
-	}
-	reports = domain.DedupReportsByUserID(reports, domain.SortByLifetimeXP)
-
-	seasonNumber, _ := GetCurrentSessionInfo(time.Now())
-
-	domain.SortReports(reports, domain.SortByLifetimeXP)
-	active := domain.FilterReports(reports, domain.HasAnyActivity)
-
-	sb := strings.Builder{}
-	sb.WriteString("⭐ *Lifetime XP Leaderboard*\n")
-	sb.WriteString(fmt.Sprintf("Season %d — total EXP sejak bergabung\n\n", seasonNumber))
-
-	if len(active) == 0 {
-		sb.WriteString("Belum ada hunter. Mulai dengan /lapor! 💪")
-		return sb.String(), nil
-	}
-
-	maxRank := 10
-	if len(active) < maxRank {
-		maxRank = len(active)
-	}
-
-	for rank := 0; rank < maxRank; rank++ {
-		r := active[rank]
-		xpProg := domain.GetNumericLevelProgress(r.TotalPoints)
-		sb.WriteString(fmt.Sprintf(
-			"%d. %s — Lv.%d (%d EXP, %d hari lifetime, %d minggu streak max 🔥)\n",
-			rank+1,
-			r.Name,
-			xpProg.Level,
-			r.TotalPoints,
-			r.TotalActiveDays(),
-			r.MaxStreak,
-		))
-	}
-
-	sb.WriteString("\nLifetime EXP tidak pernah reset. Terus berkeringat untuk naik level! 💪")
 
 	return sb.String(), nil
 }
@@ -438,10 +390,10 @@ func (uc *GetLeaderboardUsecase) executeDailyStreakMasters(ctx context.Context, 
 		if a.longest != b.longest {
 			return a.longest > b.longest
 		}
-		if a.report.TotalPoints != b.report.TotalPoints {
-			return a.report.TotalPoints > b.report.TotalPoints
+		if a.report.SeasonalPoints != b.report.SeasonalPoints {
+			return a.report.SeasonalPoints > b.report.SeasonalPoints
 		}
-		return domain.CompareReports(a.report, b.report, domain.SortByLifetimeXP)
+		return domain.CompareReports(a.report, b.report, domain.SortBySeasonRank)
 	})
 
 	sb := strings.Builder{}
@@ -467,7 +419,7 @@ func (uc *GetLeaderboardUsecase) executeDailyStreakMasters(ctx context.Context, 
 			entry.current,
 			metricLabel,
 			entry.longest,
-			entry.report.TotalPoints,
+			entry.report.SeasonalPoints,
 		))
 	}
 
@@ -537,7 +489,7 @@ func countBadges(achievements string) int {
 func formatStreakEntry(rank int, r *domain.Report, streakType, metricLabel string) string {
 	switch streakType {
 	case "daily":
-		return fmt.Sprintf("%d. %s — %d %s (max %d hari, %d pts)\n", rank, r.Name, r.ActivityCount, metricLabel, r.TotalActiveDays(), r.TotalPoints)
+		return fmt.Sprintf("%d. %s — %d %s (max %d hari, %d pts)\n", rank, r.Name, r.ActivityCount, metricLabel, r.TotalActiveDays(), r.SeasonalPoints)
 	default:
 		return fmt.Sprintf("%d. %s — %d %s (max %d minggu, %d pts)\n", rank, r.Name, r.Streak, metricLabel, r.MaxStreak, r.SeasonalPoints)
 	}

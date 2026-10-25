@@ -43,7 +43,6 @@ func (uc *UpdateNameUsecase) Execute(ctx context.Context, userID, newName string
 		Streak:         0,
 		ActivityCount:  0,
 		MaxStreak:      0,
-		TotalPoints:    0,
 		Achievements:   "",
 		ComebackStreak: 0,
 		InactiveDays:   0,

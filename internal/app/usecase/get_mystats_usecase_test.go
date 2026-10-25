@@ -127,7 +127,6 @@ func TestGetMyStatsUsecase_IncludesSeasonAndWeeklyCounts(t *testing.T) {
 			Streak:         10,
 			ActivityCount:  10,
 			MaxStreak:      12,
-			TotalPoints:    50,
 			GoalsCompleted: 2,
 		},
 		entries: map[string][]domain.ActivityLeaderboardEntry{

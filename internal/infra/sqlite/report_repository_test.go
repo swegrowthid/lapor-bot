@@ -151,7 +151,6 @@ func TestReportRepository_UpsertReportWithActivityEvent_WritesLedgerAndProjectio
 		ActivityCount:         1,
 		SeasonalActivityCount: 1,
 		LastReportDate:        now,
-		TotalPoints:           7,
 		SeasonalPoints:        7,
 	}
 	event := domain.ReportActivityEvent{
@@ -277,7 +276,7 @@ func TestReportRepository_CancelActivityEvents_ReversesLedgerAndProjections(t *t
 	report := &domain.Report{
 		UserID: "user123", Name: "Alice",
 		Streak: 1, ActivityCount: 1, SeasonalActivityCount: 1,
-		LastReportDate: now, TotalPoints: 17, SeasonalPoints: 17,
+		LastReportDate: now, SeasonalPoints: 17,
 		WalkStepsTotal: 4000, SeasonalWalkSteps: 4000,
 	}
 	forward := domain.ReportActivityEvent{
@@ -299,7 +298,7 @@ func TestReportRepository_CancelActivityEvents_ReversesLedgerAndProjections(t *t
 	cancelled := &domain.Report{
 		UserID: "user123", Name: "Alice",
 		Streak: 0, ActivityCount: 0, SeasonalActivityCount: 0,
-		TotalPoints: 0, SeasonalPoints: 0,
+		SeasonalPoints: 0,
 	}
 	cancelEvent := domain.ReportActivityEvent{
 		EventID: "ev-cancel", UserID: "user123", SeasonNumber: 2,
@@ -377,8 +376,8 @@ func TestReportRepository_CancelActivityEvents_ReversesLedgerAndProjections(t *t
 	if err != nil || got == nil {
 		t.Fatalf("GetReport() error = %v", err)
 	}
-	if got.TotalPoints != 0 || got.ActivityCount != 0 {
-		t.Fatalf("cancelled report wrong: points=%d count=%d", got.TotalPoints, got.ActivityCount)
+	if got.SeasonalPoints != 0 || got.ActivityCount != 0 {
+		t.Fatalf("cancelled report wrong: points=%d count=%d", got.SeasonalPoints, got.ActivityCount)
 	}
 }
 
@@ -396,7 +395,7 @@ func TestReportRepository_CancelActivityEvents_PreLedgerDayWritesNoProjections(t
 	// Pre-ledger day: activity log written the old way (no event, no projections).
 	report := &domain.Report{
 		UserID: "user123", Name: "Alice",
-		Streak: 1, ActivityCount: 1, LastReportDate: now, TotalPoints: 10,
+		Streak: 1, ActivityCount: 1, LastReportDate: now, SeasonalPoints: 10,
 	}
 	if err := repo.UpsertReportWithActivity(ctx, report, activityDate); err != nil {
 		t.Fatalf("UpsertReportWithActivity() error = %v", err)
@@ -451,7 +450,7 @@ func TestReportRepository_CancelActivityEvents_RepeatCancelKeepsActiveDay(t *tes
 	report := &domain.Report{
 		UserID: "user123", Name: "Alice",
 		Streak: 1, ActivityCount: 1, SeasonalActivityCount: 1,
-		LastReportDate: now, TotalPoints: 15, SeasonalPoints: 15,
+		LastReportDate: now, SeasonalPoints: 15,
 	}
 	first := domain.ReportActivityEvent{
 		EventID: "ev-1", UserID: "user123", SeasonNumber: 2,
@@ -462,7 +461,7 @@ func TestReportRepository_CancelActivityEvents_RepeatCancelKeepsActiveDay(t *tes
 	if err := repo.UpsertReportWithActivityEvent(ctx, report, first); err != nil {
 		t.Fatalf("first report: %v", err)
 	}
-	report.TotalPoints, report.SeasonalPoints = 15, 15
+	report.SeasonalPoints = 15
 	second := domain.ReportActivityEvent{
 		EventID: "ev-2", UserID: "user123", SeasonNumber: 2,
 		Kind: domain.ActivityKindRegularReport, ActivityDate: activityDate,
@@ -474,7 +473,7 @@ func TestReportRepository_CancelActivityEvents_RepeatCancelKeepsActiveDay(t *tes
 	}
 
 	// Cancel the repeat: report adjusted to 10 points, event carries -5/-1.
-	report.TotalPoints, report.SeasonalPoints = 10, 10
+	report.SeasonalPoints = 10
 	cancelEvent := domain.ReportActivityEvent{
 		EventID: "ev-cancel", UserID: "user123", SeasonNumber: 2,
 		Kind: domain.ActivityKindRegularReport, ActivityDate: activityDate,

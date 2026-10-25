@@ -1,0 +1,75 @@
+/*
+ * Design tokens: theme color roles.
+ *
+ * Single source of truth for every color value. Light theme is the default
+ * (declared on :root); the dark block re-declares only what changes.
+ * Structural tokens (spacing/radius/typography/elevation) live in tokens.ts.
+ * Consumed by apps/web/src/index.css via Tailwind `@theme inline` mapping,
+ * which makes utility classes theme-aware automatically.
+ *
+ * Contrast: text roles pass >= 4.5:1 against `--panel` in both themes
+ * (verified with the WCAG relative-luminance formula); `--ink-faint` is for
+ * large >= 24px digits only (>= 3:1).
+ */
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+  --page: #f7f8fa;
+  --page-sunken: #eef1f5;
+  --panel: #ffffff;
+  --panel-raised: #f4f6f8;
+  --border: #e3e7ec;
+  --border-strong: #cdd4dd;
+  --ink: #111827;
+  --ink-soft: #4b5563;
+  --ink-muted: #5f6874;
+  --ink-faint: #8b93a1;
+  --accent: #15803d;
+  --accent-fg: #ffffff;
+  --accent-soft: #e4f2e8;
+  --positive: #166534;
+  --positive-soft: #e4f2e8;
+  --warning: #9a4d0b;
+  --warning-soft: #fbf1e4;
+  --danger: #b3261e;
+  --danger-soft: #fdeceb;
+  --info: #1e4fa3;
+  --info-soft: #e9effb;
+  --gold: #7a5d05;
+  --gold-soft: #faf3dd;
+  --silver: #5c6672;
+  --silver-soft: #eef1f5;
+  --bronze: #8a4a1f;
+  --bronze-soft: #f8ede4;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d1117;
+  --page-sunken: #10151b;
+  --panel: #151b23;
+  --panel-raised: #1b2129;
+  --border: #262e38;
+  --border-strong: #38434f;
+  --ink: #eef1f5;
+  --ink-soft: #b8c2cd;
+  --ink-muted: #939ea9;
+  --ink-faint: #77828e;
+  --accent: #4ade80;
+  --accent-fg: #05190d;
+  --accent-soft: rgba(74, 222, 128, 0.12);
+  --positive: #8be9a8;
+  --positive-soft: rgba(139, 233, 168, 0.12);
+  --warning: #ffd166;
+  --warning-soft: rgba(255, 209, 102, 0.12);
+  --danger: #ffa8a3;
+  --danger-soft: rgba(255, 168, 163, 0.1);
+  --info: #9fc2ff;
+  --info-soft: rgba(159, 194, 255, 0.1);
+  --gold: #f3c96b;
+  --gold-soft: rgba(243, 201, 107, 0.12);
+  --silver: #c3ccd7;
+  --silver-soft: rgba(195, 204, 215, 0.1);
+  --bronze: #fba97a;
+  --bronze-soft: rgba(251, 169, 122, 0.12);
+}

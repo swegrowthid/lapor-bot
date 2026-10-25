@@ -618,7 +618,6 @@ func TestHandleMessage_GamificationCommands(t *testing.T) {
 		Streak:        10,
 		ActivityCount: 10,
 		MaxStreak:     10,
-		TotalPoints:   50,
 		Achievements:  "first_report",
 	}
 
@@ -665,7 +664,7 @@ func TestHandleMessage_JobCommands(t *testing.T) {
 	repo.reports["user1"] = &domain.Report{
 		UserID:      "user1",
 		Name:        "Hunter",
-		TotalPoints: 100,
+		SeasonalPoints: 100,
 	}
 
 	// /job command is now disabled — should be silent
@@ -869,8 +868,6 @@ func TestHandleMessage_MySideQuestCommand(t *testing.T) {
 		UserID:      "user123",
 		Name:        "TestUser",
 		JobClass:    "fighter",
-		TotalPoints: 10,
-		Level:       1,
 	}
 
 	// /mysidequest command is now disabled — should be silent
@@ -908,7 +905,6 @@ func TestHandleMessage_CancelSideQuestCommandsRouteToSideQuestCancel(t *testing.
 				UserID:             "user1",
 				Name:               "User",
 				ActivityCount:      1,
-				TotalSideQuests:    2,
 				SeasonalSideQuests: 2,
 				LastReportDate:     time.Now(),
 			}

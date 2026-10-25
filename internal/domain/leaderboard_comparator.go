@@ -13,12 +13,8 @@ const (
 	// This is the canonical season leaderboard.
 	SortBySeasonRank LeaderboardSortKey = "season_rank"
 
-	// SortByLifetimeXP ranks by total (lifetime) points — never resets.
-	// Tie-break: total active days, then max streak, then name.
-	SortByLifetimeXP LeaderboardSortKey = "lifetime_xp"
-
 	// SortByWeeklyStreak ranks by current weekly streak (consecutive weeks).
-	// Tie-break: lifetime max streak, then seasonal points, then name.
+	// Tie-break: max streak, then seasonal points, then name.
 	SortByWeeklyStreak LeaderboardSortKey = "weekly_streak"
 
 	// SortByDailyStreak ranks by current daily streak (consecutive days).
@@ -55,7 +51,7 @@ const (
 	SortByAttributeLUK LeaderboardSortKey = "attribute_luk"
 )
 
-// TotalActiveDays returns the lifetime count of active days, accounting for
+// TotalActiveDays returns the total count of active days, accounting for
 // centurion cycles (each cycle = 100 days).
 func (r *Report) TotalActiveDays() int {
 	return r.CenturionCycles*100 + r.ActivityCount
@@ -101,8 +97,6 @@ func CompareReports(a, b *Report, key LeaderboardSortKey) bool {
 	switch key {
 	case SortBySeasonRank:
 		return compareSeasonRank(a, b)
-	case SortByLifetimeXP:
-		return compareLifetimeXP(a, b)
 	case SortByWeeklyStreak:
 		return compareWeeklyStreak(a, b)
 	case SortByDailyStreak:
@@ -163,12 +157,6 @@ func HasSeasonActivity(r *Report) bool {
 	return r.SeasonalPoints > 0 || r.SeasonalActivityCount > 0
 }
 
-// HasAnyActivity returns true if a report has any lifetime engagement.
-// Used to filter out completely inactive users from lifetime boards.
-func HasAnyActivity(r *Report) bool {
-	return r.TotalPoints > 0 || r.ActivityCount > 0 || r.CenturionCycles > 0
-}
-
 // HasStreakActivity returns true if a report has any streak worth ranking.
 // Used to filter the Streak Masters leaderboard.
 func HasStreakActivity(r *Report) bool {
@@ -211,19 +199,6 @@ func compareSeasonRank(a, b *Report) bool {
 	return compareNameThenUserID(a, b)
 }
 
-func compareLifetimeXP(a, b *Report) bool {
-	if a.TotalPoints != b.TotalPoints {
-		return a.TotalPoints > b.TotalPoints
-	}
-	if a.TotalActiveDays() != b.TotalActiveDays() {
-		return a.TotalActiveDays() > b.TotalActiveDays()
-	}
-	if a.MaxStreak != b.MaxStreak {
-		return a.MaxStreak > b.MaxStreak
-	}
-	return compareNameThenUserID(a, b)
-}
-
 func compareWeeklyStreak(a, b *Report) bool {
 	if a.Streak != b.Streak {
 		return a.Streak > b.Streak
@@ -247,8 +222,8 @@ func compareDailyStreak(a, b *Report) bool {
 	if a.MaxStreak != b.MaxStreak {
 		return a.MaxStreak > b.MaxStreak
 	}
-	if a.TotalPoints != b.TotalPoints {
-		return a.TotalPoints > b.TotalPoints
+	if a.SeasonalPoints != b.SeasonalPoints {
+		return a.SeasonalPoints > b.SeasonalPoints
 	}
 	return compareNameThenUserID(a, b)
 }
@@ -273,8 +248,8 @@ func compareAttributeOverall(a, b *Report) bool {
 	if aAvg != bAvg {
 		return aAvg > bAvg
 	}
-	if a.TotalPoints != b.TotalPoints {
-		return a.TotalPoints > b.TotalPoints
+	if a.SeasonalPoints != b.SeasonalPoints {
+		return a.SeasonalPoints > b.SeasonalPoints
 	}
 	return compareNameThenUserID(a, b)
 }
@@ -303,8 +278,8 @@ func compareAttribute(a, b *Report, key LeaderboardSortKey) bool {
 	if aVal != bVal {
 		return aVal > bVal
 	}
-	if a.TotalPoints != b.TotalPoints {
-		return a.TotalPoints > b.TotalPoints
+	if a.SeasonalPoints != b.SeasonalPoints {
+		return a.SeasonalPoints > b.SeasonalPoints
 	}
 	return compareNameThenUserID(a, b)
 }

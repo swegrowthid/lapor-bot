@@ -139,59 +139,57 @@ export function StravaConnectPanel({ onMessage }: StravaConnectPanelProps) {
   const linked = status?.linked ?? false;
 
   return (
-    <section className="glass rounded-3xl p-4 sm:p-6 border border-orange-500/20">
+    <section className="rounded-lg border border-border bg-panel shadow-xs p-4 sm:p-5">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h3 className="text-lg font-bold font-orbitron text-white flex items-center gap-2">
+          <h3 className="text-lg font-bold text-ink flex items-center gap-2">
             <span aria-hidden="true">🟧</span>
             Strava Sync
           </h3>
-          <p className="text-xs text-gray-500 font-mono mt-1 leading-relaxed">
+          <p className="text-xs text-ink-muted mt-1 leading-relaxed">
             Hubungkan Strava agar aktivitas baru bisa otomatis masuk ke Lapor
             Bot.
           </p>
         </div>
         <span
-          className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold font-mono uppercase ${
+          className={`shrink-0 rounded-full border px-2.5 py-0.5 text-xs font-medium ${
             linked
-              ? "border-system-green/40 bg-system-green/10 text-system-green"
-              : "border-gray-700 bg-gray-950/60 text-gray-500"
+              ? "border-positive/30 bg-positive-soft text-positive"
+              : "border-border bg-page-sunken text-ink-muted"
           }`}
         >
           {loading ? "Checking" : linked ? "Connected" : "Offline"}
         </span>
       </div>
 
-      <div className="mt-4 rounded-2xl border border-gray-800 bg-gray-950/50 p-4">
+      <div className="mt-4 rounded-lg bg-page-sunken border border-border p-4">
         {loading ? (
-          <p className="text-xs text-gray-500 font-mono">
+          <p className="text-xs text-ink-muted">
             Memuat status Strava...
           </p>
         ) : linked ? (
           <div className="space-y-1">
-            <p className="text-sm font-bold text-white font-mono">
+            <p className="text-sm font-semibold text-ink">
               Strava aktif{status?.name ? ` untuk ${status.name}` : ""}
             </p>
-            <p className="text-xs text-gray-500 font-mono">
-              Athlete ID: {status?.athlete_id ?? "—"}
+            <p className="text-xs text-ink-muted tabular-nums">
+              Athlete ID: {status?.athlete_id ?? "-"}
             </p>
             {status?.expires_at && (
-              <p className="text-[10px] text-gray-600 font-mono uppercase">
+              <p className="text-xs text-ink-muted tabular-nums">
                 Token refresh sebelum {formatExpiry(status.expires_at)}
               </p>
             )}
           </div>
         ) : (
-          <p className="text-sm text-gray-400 font-mono">
-            Belum terhubung. Klik tombol di bawah untuk login Strava dan memberi
-            akses baca aktivitas.
+          <p className="text-sm text-ink-soft">
+            Belum terhubung. Klik tombol di bawah untuk login Strava dan
+            memberi akses baca aktivitas.
           </p>
         )}
       </div>
 
-      {error && (
-        <p className="mt-3 text-[10px] text-system-red font-mono">{error}</p>
-      )}
+      {error && <p className="mt-3 text-xs text-danger">{error}</p>}
 
       <div className="mt-4 flex flex-col sm:flex-row gap-2">
         {linked ? (
@@ -199,7 +197,7 @@ export function StravaConnectPanel({ onMessage }: StravaConnectPanelProps) {
             type="button"
             onClick={disconnect}
             disabled={disconnecting}
-            className="px-4 py-2 rounded-xl bg-system-red/10 hover:bg-system-red/20 border border-system-red/20 text-system-red font-mono text-xs font-bold transition-colors disabled:opacity-50"
+            className="px-4 py-2 rounded-md bg-danger-soft text-danger text-xs font-semibold transition-colors disabled:opacity-50 min-h-[44px]"
           >
             {disconnecting ? "Memutus..." : "Disconnect Strava"}
           </button>
@@ -208,7 +206,7 @@ export function StravaConnectPanel({ onMessage }: StravaConnectPanelProps) {
             type="button"
             onClick={connect}
             disabled={connecting}
-            className="px-4 py-2 rounded-xl bg-orange-500/15 hover:bg-orange-500/25 border border-orange-500/30 text-orange-300 font-mono text-xs font-bold transition-colors disabled:opacity-50"
+            className="px-4 py-2 rounded-md bg-accent hover:bg-accent/90 text-accent-fg text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
           >
             {connecting ? "Menunggu Strava..." : "Connect Strava"}
           </button>
@@ -226,7 +224,7 @@ export function StravaConnectPanel({ onMessage }: StravaConnectPanelProps) {
               setLoading(false);
             }
           }}
-          className="px-4 py-2 rounded-xl bg-gray-950 hover:bg-gray-900 border border-gray-800 text-gray-400 hover:text-white font-mono text-xs transition-colors"
+          className="px-4 py-2 rounded-md border border-border bg-panel hover:bg-panel-raised text-xs text-ink-soft hover:text-ink transition-colors min-h-[44px]"
         >
           Refresh Status
         </button>

@@ -153,6 +153,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
   }, [logout]);
 
   // Drop session the moment JWT exp passes while tab is open.
+  // Browsers cannot schedule a timeout longer than 2^31 - 1 ms; delays above
+  // that wrap and fire immediately, logging long-lived sessions out on load.
+  // Chunk the wait and re-arm until the real expiry passes.
   useEffect(() => {
     if (!token) return;
     const exp = tokenExpiryMs(token);
@@ -160,13 +163,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({
       logout();
       return;
     }
-    const ms = exp - Date.now();
-    if (ms <= 0) {
-      logout();
-      return;
-    }
-    const id = window.setTimeout(logout, ms);
-    return () => window.clearTimeout(id);
+    let timer = 0;
+    const wait = () => {
+      const remaining = exp - Date.now();
+      if (remaining <= 0) {
+        logout();
+        return;
+      }
+      timer = window.setTimeout(wait, Math.min(remaining, 2_147_483_000));
+    };
+    wait();
+    return () => window.clearTimeout(timer);
   }, [token, logout]);
 
   // Sync token across tabs

@@ -120,7 +120,7 @@ var AllAchievements = []Achievement{
 	},
 	// --- Extended Streak Achievements ---
 	// NOTE: streak_5, streak_10, season_active_7 and season_active_25 exist only
-	// in this legacy lifetime catalog — they were never reachable through the
+	// in this legacy all-time catalog — they were never reachable through the
 	// report flow (which checks AllSeasonAchievements + comeback badges) and
 	// were only unlockable through the old cancel-recalculation backdoor. They
 	// are retired: kept here so past earners keep their badges, but no longer
@@ -196,8 +196,8 @@ var AllAchievements = []Achievement{
 	},
 }
 
-// AllSeasonAchievements defines resettable season badges. Lifetime level/EXP is
-// still preserved, but these badge unlock states reset at the season boundary.
+// AllSeasonAchievements defines resettable season badges. Badge unlock states
+// reset at the season boundary.
 var AllSeasonAchievements = []Achievement{
 	{
 		ID:            "first_report",
@@ -461,7 +461,7 @@ func RecentAchievementSummaries(achievements string, limit int) []BadgeSummary {
 // Retired badges are never returned.
 //
 // Deprecated: the report flow awards season badges via CheckNewSeasonAchievements
-// plus comeback badges via CheckComebackAchievements. This legacy lifetime
+// plus comeback badges via CheckComebackAchievements. This legacy all-time
 // catalog is display-only (FindBadgeSummary) since the cancel recalculation —
 // its last caller — stopped awarding achievements.
 func CheckNewAchievements(report *Report) []Achievement {

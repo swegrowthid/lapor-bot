@@ -78,7 +78,7 @@ func (u *DailyQuestUsecase) SendDailyQuests(ctx context.Context, now time.Time, 
 			continue
 		}
 
-		tasks, err := u.GetOrGenerateQuestList(ctx, r.UserID, r.JobClass, r.Level, now)
+		tasks, err := u.GetOrGenerateQuestList(ctx, r.UserID, r.JobClass, 0, now)
 		if err != nil {
 			log.Printf("[SIDE-QUEST] Failed to generate quest for %s: %v", r.UserID, err)
 			continue
@@ -126,14 +126,14 @@ func (u *DailyQuestUsecase) ViewQuest(ctx context.Context, userID, name string, 
 		return "🔒 *Side quest belum terbuka.*\n\nSide quest tersedia untuk profil yang sudah punya job. Untuk sementara, cek progres dan info profil di web: https://lapor-bot.web.id/", nil
 	}
 
-	tasks, err := u.GetOrGenerateQuestList(ctx, userID, report.JobClass, report.Level, now)
+	tasks, err := u.GetOrGenerateQuestList(ctx, userID, report.JobClass, 0, now)
 	if err != nil {
 		return "", err
 	}
 
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("📜 *Side Quest Hari Ini - %s* 🏹\n", report.Name))
-	sb.WriteString(fmt.Sprintf("Job: %s (Lv.%d)\n", domain.FormatJobClass(report.JobClass), report.Level))
+	sb.WriteString(fmt.Sprintf("Job: %s\n", domain.FormatJobClass(report.JobClass)))
 	sb.WriteString("Reward: XP bonus per side quest yang valid (easy/medium/hard). /lapor utama tetap prioritas.\n\n")
 
 	completed := 0
@@ -147,7 +147,7 @@ func (u *DailyQuestUsecase) ViewQuest(ctx context.Context, userID, name string, 
 	}
 
 	sb.WriteString(fmt.Sprintf("\nProgress hari ini: %s\n", formatQuestProgressBar(tasks)))
-	sb.WriteString(fmt.Sprintf("Total side quest selesai: %d lifetime • %d season\n\n", report.TotalSideQuests, report.SeasonalSideQuests))
+	sb.WriteString(fmt.Sprintf("Total side quest selesai: %d season\n\n", report.SeasonalSideQuests))
 	sb.WriteString("Cara lapor: `/lapor sidequest <nama kegiatan> <jumlah>`\n")
 	sb.WriteString("Gunakan nama kegiatan sesuai yang tertera di atas.\n")
 	sb.WriteString("Contoh:\n")
@@ -185,7 +185,7 @@ func (u *DailyQuestUsecase) UpdateProgress(ctx context.Context, userID, name str
 		return fmt.Sprintf("Batas side quest harian sudah penuh (%dx). Kamu tetap masih punya slot laporan utama terpisah sampai %dx hari ini. 🙏", MaxDailySideQuests, MaxDailyRegularReports), nil
 	}
 
-	tasks, err := u.GetOrGenerateQuestList(ctx, userID, report.JobClass, report.Level, now)
+	tasks, err := u.GetOrGenerateQuestList(ctx, userID, report.JobClass, 0, now)
 	if err != nil {
 		return "", err
 	}

@@ -116,8 +116,8 @@ func TestIntegration_SameDayReportAndSideQuests_FairPoints(t *testing.T) {
 	if got := r.SeasonalPoints - first.SeasonalPoints; got != 5 {
 		t.Errorf("side quests award difficulty points only (2+3=5), got +%d", got)
 	}
-	if r.TotalSideQuests != 2 || r.SeasonalSideQuests != 2 {
-		t.Errorf("expected 2 side quests, got %d/%d", r.TotalSideQuests, r.SeasonalSideQuests)
+	if r.SeasonalSideQuests != 2 {
+		t.Errorf("expected 2 side quests, got %d", r.SeasonalSideQuests)
 	}
 
 	today := domain.GetToday(now)

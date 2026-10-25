@@ -103,7 +103,6 @@ Command lain yang diawali `/` akan mendapat pesan fallback berisi link bantuan d
 - **Side Quest (`/lapor sidequest`)**: Bonus gerak harian easy/medium/hard untuk user yang sudah punya job. Lapor dengan `/lapor sidequest jalan 4000` atau `/lapor sidequest sepeda 5 km`.
 - **Goals Tracking**: Set personal dan weekly goals. Bot akan mengirim notifikasi ke grup saat goal terselesaikan!
 - **Season Badges**: Badge reset setiap season supaya semua member mulai berburu dari awal.
-- **Lifetime Level & EXP**: Total poin dan level numerik (`Lv.0+`) tetap tersimpan lintas season. EXP naik level memakai kurva `5×level² + 50×level + 100` agar makin tinggi level makin lama naiknya.
 - **Milestone Notification**: Dapat notifikasi khusus saat mencapai streak tertenu (7, 14, 30 hari, dst).
 - **Leaderboard**: Bersaing dengan teman untuk streak tertinggi di https://lapor-bot.web.id/.
 
